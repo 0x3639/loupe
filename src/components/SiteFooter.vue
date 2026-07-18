@@ -6,14 +6,14 @@
       <div class="col">
         <span class="ledger-label">Zenon</span>
         <a href="https://zenon.network">zenon.network</a>
-        <a href="https://zenon.wtf/">zenon.wtf</a>
         <a href="https://zenon.org">zenon.org</a>
         <a href="https://zenonhub.io">zenonhub.io</a>
+        <a href="https://zenon.wtf/">zenon.wtf</a>
       </div>
       <div class="col">
         <span class="ledger-label">Research</span>
+        <a href="https://github.com/zenon-network">zenon-network</a>
         <a href="https://github.com/TminusZ/zenon-developer-commons">zenon-developer-commons</a>
-        <a href="https://github.com/zenon-network">zenon-network org</a>
       </div>
       <div class="col">
         <span class="ledger-label">Loupe</span>
