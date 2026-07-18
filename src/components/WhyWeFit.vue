@@ -2,7 +2,7 @@
 const checks = [
   { title: 'FOSS, community-run', body: 'No corporate entity. Founding devs were anonymous and handed the network to the community; development, node operation, and funding are all community-driven.' },
   { title: 'Fair launch', body: 'No ICO, no VC or insider allocation, no team tokens. Users bonded BTC, ran nodes, and received allocations — and their bitcoin back via algorithmic refunds.' },
-  { title: 'Bitcoin-aligned research', body: 'An open research commons exploring Zenon as a potential bitcoin scaling/interoperability layer: SPV models, verification boundaries, Taproot-era designs.' },
+  { title: 'Bitcoin-aligned research', body: 'An open <a href="https://github.com/TminusZ/zenon-developer-commons">research commons</a> exploring Zenon as a potential bitcoin scaling/interoperability layer: SPV models, verification boundaries, Taproot-era designs.' },
   { title: 'No audit budget', body: 'The exact attacker/maintainer asymmetry the Loupe launch post describes — well-resourced attackers, unfunded maintainers.' },
   { title: 'In active development since 2019', body: 'A living Go codebase with consensus, p2p, an embedded VM, wallet, and RPC — real attack surface, actively maintained.' },
   { title: 'We already build with Spiral tools', body: 'goose is part of our daily coding workflow, and we run buzz (buzz.zenon.info) for the community. Loupe would be the third.' },
@@ -19,7 +19,8 @@ const checks = [
         <span class="tick">✓</span>
         <div>
           <div class="check-title">{{ c.title }}</div>
-          <div class="check-body">{{ c.body }}</div>
+          <!-- bodies are static strings authored in this file; v-html lets them carry links -->
+          <div class="check-body" v-html="c.body"></div>
         </div>
       </div>
     </div>

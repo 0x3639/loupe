@@ -16,5 +16,6 @@ describe('WhyWeFit', () => {
       'We already build with Spiral tools',
     ])
     expect(wrapper.findAll('.tick')).toHaveLength(6)
+    expect(wrapper.get('a[href="https://github.com/TminusZ/zenon-developer-commons"]').text()).toBe('research commons')
   })
 })
