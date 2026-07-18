@@ -28,6 +28,8 @@ describe('WhatZenonIs', () => {
     const wrapper = mount(WhatZenonIs)
     expect(wrapper.text()).toContain('A feeless, dual-ledger network, verifiable from a browser.')
     expect(wrapper.get('a[href="https://github.com/TminusZ/zenon-developer-commons"]').text()).toBe('architecture')
+    expect(wrapper.get('a[href="https://bitcoin.org/bitcoin.pdf"]').text()).toBe('section 8 of the bitcoin white paper')
+    expect(wrapper.text()).toContain("The community is building out the vision. Don't trust. Verify.")
     expect(wrapper.text()).toContain('Dual ledger · asynchronous account chains')
     expect(wrapper.text()).toContain('Both ledgers grow together.')
   })
