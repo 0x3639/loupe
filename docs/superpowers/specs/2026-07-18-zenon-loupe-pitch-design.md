@@ -44,7 +44,7 @@ Ported from the prototype's script with identical parameters (matrix rain: 16px 
 
 1. Footer contact placeholder → `portal@zenon.network`.
 2. Prototype's broken references (`support.js`, `uploads/*.png`) ignored; logo from `assets/znn-logo.png`.
-3. **Responsive additions** (handoff is desktop-only): below ~860px, multi-column grids collapse to one column, the stat strip wraps, the hero illustration hides or shrinks, and the H1 steps down. Pixel-perfect at desktop widths; not-broken on phones.
+3. **Responsive additions** (handoff is desktop-only): below ~860px, multi-column grids collapse to one column, the stat strip wraps to a 2-per-row grid, the hero illustration (and its rain/halo layers) is hidden, and the H1 steps down to 38px. Pixel-perfect at desktop widths; not-broken on phones.
 
 ## Deployment
 
