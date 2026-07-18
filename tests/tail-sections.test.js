@@ -8,7 +8,8 @@ describe('ScopeAside', () => {
   it('renders the honest scope note', () => {
     const wrapper = mount(ScopeAside)
     expect(wrapper.text()).toContain('On scope, honestly')
-    expect(wrapper.text()).toContain('phase 1 is bitcoin-ecosystem repos')
+    expect(wrapper.text()).toContain('the Loupe phase 1 rollout is bitcoin-ecosystem repos')
+    expect(wrapper.text()).toContain('we meet the criteria for participation')
   })
 })
 

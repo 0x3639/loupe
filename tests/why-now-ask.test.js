@@ -14,12 +14,12 @@ describe('WhyNow', () => {
 })
 
 describe('AskCommit', () => {
-  it('renders three numbered asks and four commitments', () => {
+  it('renders two numbered asks and four commitments', () => {
     const wrapper = mount(AskCommit)
     expect(wrapper.text()).toContain("What we're asking for")
     expect(wrapper.text()).toContain('What we commit to')
-    expect(wrapper.findAll('.ask')).toHaveLength(3)
+    expect(wrapper.findAll('.ask')).toHaveLength(2)
     expect(wrapper.findAll('.commit')).toHaveLength(4)
-    expect(wrapper.text()).toContain('guinea pig')
+    expect(wrapper.text()).toContain('Repo-prep guidance')
   })
 })

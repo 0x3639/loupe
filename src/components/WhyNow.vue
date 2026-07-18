@@ -27,6 +27,6 @@
 .head { margin-bottom: 8px; }
 .name { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
 .body { font-size: 14.5px; line-height: 1.6; color: var(--muted); }
-.closing { font-size: 16px; line-height: 1.7; color: var(--body-text); margin: 0; max-width: 76ch; }
+.closing { font-size: 16px; line-height: 1.7; color: var(--body-text); margin: 0; }
 @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 </style>

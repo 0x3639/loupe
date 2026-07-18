@@ -1,7 +1,6 @@
 <script setup>
 const asks = [
   'A funded Loupe scan of go-zenon — and other Zenon repos, one at a time, as Loupe supports.',
-  "If that's out of scope for phase 1: guidance to self-run Loupe with our own model tokens. We'll be the guinea pig for the self-serve path on a Go codebase and report back publicly.",
   "Repo-prep guidance — the launch post says markdown context files optimize scanning; we'll write them.",
 ]
 const commits = [

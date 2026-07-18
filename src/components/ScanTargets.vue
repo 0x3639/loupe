@@ -25,7 +25,7 @@
 
 <style scoped>
 .eyebrow { margin: 0 0 12px; }
-.grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .target-card { padding: 24px; }
 .head-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .repo { font-family: var(--mono); font-size: 17px; font-weight: 600; color: var(--fg); }
