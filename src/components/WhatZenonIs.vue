@@ -4,14 +4,10 @@ import VerifyPanel from './VerifyPanel.vue'
 </script>
 
 <template>
-  <section class="what">
-    <div class="head">
-      <p class="ledger-label eyebrow">What Zenon is</p>
-      <h2 class="h2">A feeless, dual-ledger network, verifiable from a browser.</h2>
-      <p class="lead">Zenon pairs per-user account chains with a global settlement chain that produces <em>momentums</em> (blocks). Each account processes transactions on its own chain — truly asynchronous and parallel — while momentums provide an ordered commitment over the whole network. Because momentums commit to network state in a small header chain, clients can verify inclusion with SPV-style proofs alone. That unlocks browser-native proof verification, wallets, and eventually node participation and execution — no trusted remote RPC. The <a href="https://github.com/TminusZ/zenon-developer-commons">architecture</a> is in place. The community is building out the vision.</p>
-    </div>
-    <!-- the cards break out of the 1080px column: the dual-ledger canvas
-         earns the extra runway, the prose above stays at a readable measure -->
+  <section class="section">
+    <p class="ledger-label eyebrow">What Zenon is</p>
+    <h2 class="h2">A feeless, dual-ledger network, verifiable from a browser.</h2>
+    <p class="lead">Zenon pairs per-user account chains with a global settlement chain that produces <em>momentums</em> (blocks). Each account processes transactions on its own chain — truly asynchronous and parallel — while momentums provide an ordered commitment over the whole network. Because momentums commit to network state in a small header chain, clients can verify inclusion with SPV-style proofs alone. That unlocks browser-native proof verification, wallets, and eventually node participation and execution — no trusted remote RPC. The <a href="https://github.com/TminusZ/zenon-developer-commons">architecture</a> is in place. The community is building out the vision.</p>
     <div class="cards">
       <div class="card arch-card">
         <div class="ledger-label arch-head">Dual ledger · asynchronous account chains</div>
@@ -24,11 +20,9 @@ import VerifyPanel from './VerifyPanel.vue'
 </template>
 
 <style scoped>
-.what { padding-top: 72px; }
-.head { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
 .eyebrow { margin: 0 0 12px; }
-.lead { font-size: 17px; line-height: 1.75; color: var(--body-text); max-width: 76ch; margin: 0; }
-.cards { max-width: 1440px; margin: 36px auto 0; padding: 0 32px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+.lead { font-size: 17px; line-height: 1.75; color: var(--body-text); margin: 0; }
+.cards { margin-top: 36px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
 .arch-card { padding: 26px 28px; }
 .arch-head { margin-bottom: 18px; }
 .arch-mask { -webkit-mask-image: linear-gradient(90deg, transparent 0, black 26px, black 100%); mask-image: linear-gradient(90deg, transparent 0, black 26px, black 100%); }
