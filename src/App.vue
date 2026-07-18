@@ -17,15 +17,17 @@ const showAside = import.meta.env.VITE_SHOW_ASIDE !== 'false'
 <template>
   <div class="page">
     <SiteNav />
-    <HeroSection />
-    <StatStrip />
-    <WhatZenonIs />
-    <WhyWeFit />
-    <WhyNow />
-    <AskCommit />
-    <ScopeAside v-if="showAside" />
-    <ScanTargets />
-    <ClosingCta />
+    <main>
+      <HeroSection />
+      <StatStrip />
+      <WhatZenonIs />
+      <WhyWeFit />
+      <WhyNow />
+      <AskCommit />
+      <ScopeAside v-if="showAside" />
+      <ScanTargets />
+      <ClosingCta />
+    </main>
     <SiteFooter />
   </div>
 </template>

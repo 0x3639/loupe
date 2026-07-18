@@ -14,7 +14,7 @@ const commits = [
 <template>
   <section class="section ask-grid">
     <div>
-      <p class="ledger-label eyebrow">What we're asking for</p>
+      <h2 class="ledger-label eyebrow">What we're asking for</h2>
       <ol class="asks">
         <li v-for="(a, i) in asks" :key="i" class="ask">
           <span class="num">{{ i + 1 }}</span>
@@ -23,7 +23,7 @@ const commits = [
       </ol>
     </div>
     <div>
-      <p class="ledger-label eyebrow">What we commit to</p>
+      <h2 class="ledger-label eyebrow">What we commit to</h2>
       <ul class="commits">
         <li v-for="c in commits" :key="c" class="commit">
           <span class="arrow">→</span>{{ c }}

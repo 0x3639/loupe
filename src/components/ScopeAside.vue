@@ -3,7 +3,7 @@
 <template>
   <section class="aside-section">
     <div class="aside">
-      <p class="ledger-label head">On scope, honestly</p>
+      <h2 class="ledger-label head">On scope, honestly</h2>
       <p class="body">We know the Loupe phase 1 rollout is bitcoin-ecosystem repos. We think a fairly-launched, community-run FOSS network researching bitcoin scaling is within the spirit of the program — and we meet the criteria for participation.</p>
     </div>
   </section>

@@ -70,7 +70,7 @@ One scan. Confirmed findings, PoC included, fixed in the next upgrade. No applic
 
 ## Links
 
-- Zenon: zenon.network · zenon.wtf · zenon.org · zenonhub.io
-- Research: zenon-developer-commons (https://github.com/TminusZ/zenon-developer-commons) · zenon-network org (https://github.com/zenon-network)
-- Loupe: project-loupe/loupe (https://github.com/project-loupe/loupe) · launch post (https://spiralxyz.substack.com/p/meet-loupe-ai-powered-vulnerability) · @ProjectLoupe (https://x.com/ProjectLoupe)
+- Zenon: zenon.network · zenon.org · zenonhub.io · zenon.wtf
+- Research: zenon-network (https://github.com/zenon-network) · zenon-developer-commons (https://github.com/TminusZ/zenon-developer-commons)
+- Loupe: project-loupe/loupe (https://github.com/project-loupe/loupe) · launch post (https://spiralxyz.substack.com/p/meet-loupe-ai-powered-vulnerability) · intro video (https://www.youtube.com/watch?v=WisO6hoeUb8) · @ProjectLoupe (https://x.com/ProjectLoupe)
 - Contact: #loupe:zenon.chat · portal@zenon.network

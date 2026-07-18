@@ -29,4 +29,8 @@ const logoUrl = import.meta.env.BASE_URL + 'znn-logo.png'
   .logo { width: 28px; height: 28px; }
   .links { gap: 12px; font-size: 12.5px; }
 }
+@media (max-width: 360px) {
+  /* the GitHub link also lives in Scan targets and the footer */
+  .muted-link { display: none; }
+}
 </style>

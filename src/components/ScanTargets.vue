@@ -2,7 +2,7 @@
 
 <template>
   <section class="section">
-    <p class="ledger-label eyebrow">Scan targets</p>
+    <h2 class="ledger-label eyebrow">Scan targets</h2>
     <div class="grid">
       <div class="card target-card">
         <div class="head-row">
