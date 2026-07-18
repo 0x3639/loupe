@@ -15,37 +15,51 @@ onMounted(() => {
   const LANE_MIN = 40 // account-chain speeds wander within this range (px/s)
   const LANE_MAX = 90
   const GAP = 46 // fixed center-to-center spacing between account blocks (30px block + 16px)
-  const LANES = [
-    { y: 52, label: 'z1qx…f8a' },
-    { y: 108, label: 'z1qp…2mk' },
-    { y: 164, label: 'z1qz…9rw' },
-  ]
+  const FADE = 0.6 // seconds for a lane to fade in/out of the visible set
+  const SLOT_YS = [44, 80, 116, 152, 188] // room for up to 5 visible lanes
+  const MIN_LANES = 3
+  const MAX_LANES = 5
   const now = () => performance.now() / 1000
   const rnd = (a, b) => a + Math.random() * (b - a)
   const t0 = now()
-  const st = {
-    lanes: LANES.map((l) => ({
-      y: l.y,
-      label: l.label,
+  const ADDR_CHARS = 'qpzrxy0f2mk9wsn3l7'
+  const pick = (s) => s[Math.floor(Math.random() * s.length)]
+  const randLabel = () => `z1q${pick(ADDR_CHARS)}…${pick(ADDR_CHARS)}${pick(ADDR_CHARS)}${pick(ADDR_CHARS)}`
+  // lanes fade in already populated: the view is a rotating window over many
+  // account chains, not chains springing into existence
+  const makeLane = (y, label, fadeIn) => {
+    const l = {
+      y,
+      label,
       blocks: [],
-      pos: t0 * VM,
+      pos: now() * VM,
       v: rnd(LANE_MIN, LANE_MAX),
       vTarget: rnd(LANE_MIN, LANE_MAX),
       vChangeIn: rnd(2, 4),
-    })),
+      alpha: fadeIn ? 0 : 1,
+      leaving: false,
+      fadeT: now(),
+    }
+    for (let i = 24; i >= 0; i--) {
+      l.blocks.push({ x: l.pos - i * GAP, born: now() - 10 })
+    }
+    return l
+  }
+  const st = {
+    lanes: [
+      makeLane(SLOT_YS[0], 'z1qx…f8a', false),
+      makeLane(SLOT_YS[2], 'z1qp…2mk', false),
+      makeLane(SLOT_YS[4], 'z1qz…9rw', false),
+    ],
     moms: [],
     flies: [],
     pend: [],
     nextMomT: t0 + MOMIV,
+    nextRotT: t0 + rnd(2.5, 5),
     height: 4821304,
   }
-  st.lanes.forEach((l) => {
-    for (let i = 24; i >= 0; i--) {
-      l.blocks.push({ x: l.pos - i * GAP, born: t0 - 10 })
-    }
-  })
   for (let t = t0 - 60; t < t0 - 2; t += MOMIV) {
-    st.moms.push({ x: t * VM, born: t0 - 10, count: 9 + Math.floor(Math.random() * 6) })
+    st.moms.push({ x: t * VM, born: t0 - 10, count: 12 + Math.floor(Math.random() * 6) })
     st.height++
   }
   const rr = (x, y, w, h, r) => {
@@ -67,6 +81,33 @@ onMounted(() => {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, w, H)
     const camM = t * VM - w + 120
+    // rotate the visible set of account chains every few seconds
+    if (t >= st.nextRotT) {
+      const live = st.lanes.filter((l) => !l.leaving)
+      const canAdd = live.length < MAX_LANES
+      const canRemove = live.length > MIN_LANES
+      if (canAdd && (!canRemove || Math.random() < 0.5)) {
+        const used = new Set(st.lanes.map((l) => l.y))
+        const free = SLOT_YS.filter((y) => !used.has(y))
+        if (free.length) {
+          st.lanes.push(makeLane(free[Math.floor(Math.random() * free.length)], randLabel(), true))
+        }
+      } else if (canRemove) {
+        const l = live[Math.floor(Math.random() * live.length)]
+        l.leaving = true
+        l.fadeT = t
+      }
+      st.nextRotT = t + rnd(2.5, 5)
+    }
+    st.lanes = st.lanes.filter((l) => {
+      if (l.leaving) {
+        l.alpha = Math.max(0, 1 - (t - l.fadeT) / FADE)
+        if (l.alpha === 0) return false
+      } else if (l.alpha < 1) {
+        l.alpha = Math.min(1, (t - l.fadeT) / FADE)
+      }
+      return true
+    })
     st.lanes.forEach((l) => {
       l.vChangeIn -= dt
       if (l.vChangeIn <= 0) {
@@ -75,6 +116,7 @@ onMounted(() => {
       }
       l.v += (l.vTarget - l.v) * Math.min(1, dt * 1.5)
       l.pos += l.v * dt
+      if (l.leaving) return // a departing chain stops firing
       // fire by distance, not time: a block spawns each time the chain has
       // advanced one fixed GAP, so spacing stays uniform and never overlaps
       while (l.pos - l.blocks[l.blocks.length - 1].x >= GAP) {
@@ -104,6 +146,7 @@ onMounted(() => {
     st.lanes.forEach((l) => {
       const camL = l.pos - w + 120
       ctx.save()
+      ctx.globalAlpha = l.alpha
       ctx.translate(-camL, 0)
       ctx.strokeStyle = 'hsl(0 0% 24%)'
       ctx.lineWidth = 1
@@ -190,11 +233,14 @@ onMounted(() => {
     ctx.textAlign = 'left'
     ctx.font = '9px "JetBrains Mono", monospace'
     st.lanes.forEach((l) => {
+      ctx.save()
+      ctx.globalAlpha = l.alpha
       const tw = ctx.measureText(l.label).width
       ctx.fillStyle = 'hsl(0 0% 10% / .85)'
       ctx.fillRect(30, l.y - 26, tw + 8, 14)
       ctx.fillStyle = 'hsl(0 0% 55%)'
       ctx.fillText(l.label, 34, l.y - 19)
+      ctx.restore()
     })
     const ml = 'MOMENTUM CHAIN'
     ctx.fillStyle = 'hsl(0 0% 10% / .85)'
