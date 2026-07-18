@@ -18,8 +18,15 @@ const logoUrl = import.meta.env.BASE_URL + 'znn-logo.png'
 <style scoped>
 .nav { display: flex; align-items: center; justify-content: space-between; max-width: 1080px; margin: 0 auto; padding: 22px 32px; }
 .brand { display: flex; align-items: center; gap: 10px; }
+.brand span, .links a { white-space: nowrap; }
 .logo { width: 34px; height: 34px; border-radius: 50%; display: block; }
 .links { display: flex; align-items: center; gap: 22px; font-size: 14px; }
 .muted-link { color: var(--muted); }
 .green-link { color: var(--green); }
+@media (max-width: 480px) {
+  .nav { padding: 18px 20px; }
+  .brand { gap: 8px; }
+  .logo { width: 28px; height: 28px; }
+  .links { gap: 12px; font-size: 12.5px; }
+}
 </style>

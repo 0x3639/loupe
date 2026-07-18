@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 
 const canvas = ref(null)
 let raf = 0
+let io = null
 
 onMounted(() => {
   const cv = canvas.value
@@ -39,7 +40,7 @@ onMounted(() => {
       y: dropIn ? SLOT_YS[slot] - 34 : SLOT_YS[slot],
       label,
       blocks: [],
-      pos: now() * VM,
+      pos: 0,
       v: rnd(LANE_MIN, LANE_MAX),
       vTarget: rnd(LANE_MIN, LANE_MAX),
       vChangeIn: rnd(2, 4),
@@ -48,10 +49,12 @@ onMounted(() => {
       fadeT: now(),
     }
     for (let i = 24; i >= 0; i--) {
-      l.blocks.push({ x: l.pos - i * GAP, born: now() - 10 })
+      l.blocks.push({ x: -i * GAP, born: t0 - 10 })
     }
     return l
   }
+  // all scheduling integrates dt (not wall-clock), so pausing the loop while
+  // offscreen resumes seamlessly with no jumps or catch-up bursts
   const st = {
     lanes: [
       makeLane(2, 'z1qx…f8a', false),
@@ -61,12 +64,13 @@ onMounted(() => {
     moms: [],
     flies: [],
     pend: [],
-    nextMomT: t0 + MOMIV,
-    nextRotT: t0 + rnd(2.5, 5),
+    mpos: 0, // momentum chain's integrated scroll position
+    momClock: 0, // time into the current 3s momentum window
+    rotIn: rnd(2.5, 5), // seconds until the lane set rotates
     height: 4821304,
   }
-  for (let t = t0 - 60; t < t0 - 2; t += MOMIV) {
-    st.moms.push({ x: t * VM, born: t0 - 10, count: 12 + Math.floor(Math.random() * 6) })
+  for (let k = 20; k >= 1; k--) {
+    st.moms.push({ x: -k * MOMIV * VM, born: t0 - 10, count: 12 + Math.floor(Math.random() * 6) })
     st.height++
   }
   const rr = (x, y, w, h, r) => {
@@ -87,9 +91,14 @@ onMounted(() => {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, w, H)
-    const camM = t * VM - w + 120
+    const compact = w < 500 // phone-width card: hide label plates, tighter anchor
+    const anch = w - (compact ? 96 : 120) // screen x where new blocks appear
+    st.mpos += VM * dt
+    st.momClock += dt
+    st.rotIn -= dt
+    const camM = st.mpos - anch
     // rotate the visible set of account chains every few seconds
-    if (t >= st.nextRotT) {
+    if (st.rotIn <= 0) {
       const live = st.lanes.filter((l) => !l.leaving)
       const canAdd = live.length < MAX_LANES
       const canRemove = live.length > MIN_LANES
@@ -105,7 +114,7 @@ onMounted(() => {
           if (o !== l && o.slot < l.slot) o.slot += 1
         })
       }
-      st.nextRotT = t + rnd(2.5, 5)
+      st.rotIn = rnd(2.5, 5)
     }
     st.lanes = st.lanes.filter((l) => {
       if (l.leaving) {
@@ -149,18 +158,20 @@ onMounted(() => {
       }
       return true
     })
-    if (t >= st.nextMomT) {
+    if (st.momClock >= MOMIV) {
+      st.momClock -= MOMIV
       st.height++
-      st.moms.push({ x: st.nextMomT * VM, born: t, count: st.pend.length || 1 })
+      st.moms.push({ x: st.mpos, born: t, count: st.pend.length || 1 })
       st.pend = []
-      st.nextMomT += MOMIV
       if (st.moms.length > 40) st.moms.shift()
     }
+    // the pending momentum's ghost slot slides toward the anchor as its window closes
+    const gx = st.mpos + (MOMIV - st.momClock) * VM
     ctx.font = '10px "JetBrains Mono", monospace'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     st.lanes.forEach((l) => {
-      const camL = l.pos - w + 120
+      const camL = l.pos - anch
       ctx.save()
       ctx.globalAlpha = l.alpha
       ctx.translate(-camL, 0)
@@ -216,7 +227,6 @@ onMounted(() => {
       ctx.stroke()
       ctx.fillText(b.count + ' tx', b.x, MOMY + 0.5)
     })
-    const gx = st.nextMomT * VM
     ctx.setLineDash([4, 4])
     ctx.strokeStyle = 'hsl(0 0% 32%)'
     rr(gx - 28, MOMY - 16, 56, 32, 5)
@@ -234,7 +244,7 @@ onMounted(() => {
     // (the momentum frame) scroll at different speeds. Each dot aims at its
     // own grid slot inside the pending momentum box.
     st.flies.forEach((f) => {
-      const sx = f.x0 - (f.lane.pos - w + 120)
+      const sx = f.x0 - (f.lane.pos - anch)
       const sy = f.lane.y
       const ex = dotX(gx, f.slot) - camM
       const ey = dotY(f.slot)
@@ -249,34 +259,61 @@ onMounted(() => {
       ctx.fillStyle = 'hsl(145 100% 50% / .95)'
       ctx.fill()
     })
-    // account-chain addresses sit to the LEFT of each chain, on the lane line
-    ctx.textAlign = 'left'
-    ctx.font = '9px "JetBrains Mono", monospace'
-    st.lanes.forEach((l) => {
-      ctx.save()
-      ctx.globalAlpha = l.alpha
-      const tw = ctx.measureText(l.label).width
+    if (!compact) {
+      // chain labels sit as plates on the left of each line; hidden on
+      // phone-width cards where they would crowd the blocks
+      ctx.textAlign = 'left'
+      ctx.font = '9px "JetBrains Mono", monospace'
+      st.lanes.forEach((l) => {
+        ctx.save()
+        ctx.globalAlpha = l.alpha
+        const tw = ctx.measureText(l.label).width
+        ctx.fillStyle = 'hsl(0 0% 10% / .95)'
+        ctx.fillRect(28, l.y - 8, tw + 10, 16)
+        ctx.fillStyle = 'hsl(0 0% 55%)'
+        ctx.fillText(l.label, 33, l.y + 0.5)
+        ctx.restore()
+      })
+      const ml = 'MOMENTUM CHAIN'
+      const mlw = ctx.measureText(ml).width
       ctx.fillStyle = 'hsl(0 0% 10% / .95)'
-      ctx.fillRect(28, l.y - 8, tw + 10, 16)
-      ctx.fillStyle = 'hsl(0 0% 55%)'
-      ctx.fillText(l.label, 33, l.y + 0.5)
-      ctx.restore()
-    })
-    const ml = 'MOMENTUM CHAIN'
-    const mlw = ctx.measureText(ml).width
-    ctx.fillStyle = 'hsl(0 0% 10% / .95)'
-    ctx.fillRect(28, MOMY - 8, mlw + 10, 16)
-    ctx.fillStyle = 'hsl(0 0% 60%)'
-    ctx.fillText(ml, 33, MOMY + 0.5)
+      ctx.fillRect(28, MOMY - 8, mlw + 10, 16)
+      ctx.fillStyle = 'hsl(0 0% 60%)'
+      ctx.fillText(ml, 33, MOMY + 0.5)
+    }
     ctx.textAlign = 'right'
+    ctx.font = '9px "JetBrains Mono", monospace'
     ctx.fillStyle = 'hsl(0 0% 45%)'
     ctx.fillText('height ' + st.height.toLocaleString('en-US'), w - 8, H - 8)
-    if (!reduced) raf = requestAnimationFrame(frame)
+    if (!reduced && running) raf = requestAnimationFrame(frame)
   }
-  frame()
+  // run only while visible: offscreen or display:none pauses the loop
+  let running = false
+  const start = () => {
+    if (running) return
+    running = true
+    last = now()
+    raf = requestAnimationFrame(frame)
+  }
+  const stop = () => {
+    running = false
+    cancelAnimationFrame(raf)
+  }
+  if (typeof IntersectionObserver !== 'undefined') {
+    io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) start()
+      else stop()
+    })
+    io.observe(cv)
+  } else {
+    start()
+  }
 })
 
-onUnmounted(() => cancelAnimationFrame(raf))
+onUnmounted(() => {
+  cancelAnimationFrame(raf)
+  if (io) io.disconnect()
+})
 </script>
 
 <template>

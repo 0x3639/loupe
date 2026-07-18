@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 
 const canvas = ref(null)
 let raf = 0
+let io = null
 
 onMounted(() => {
   const cv = canvas.value
@@ -51,12 +52,35 @@ onMounted(() => {
         ctx.fillText(c.chars[(r + Math.floor(c.y / rows)) % c.chars.length], c.x, r * FS)
       }
     })
-    if (!reduced) raf = requestAnimationFrame(frame)
+    if (!reduced && running) raf = requestAnimationFrame(frame)
   }
-  raf = requestAnimationFrame(frame)
+  // run only while visible: display:none (mobile) or offscreen pauses the loop
+  let running = false
+  const start = () => {
+    if (running) return
+    running = true
+    last = performance.now()
+    raf = requestAnimationFrame(frame)
+  }
+  const stop = () => {
+    running = false
+    cancelAnimationFrame(raf)
+  }
+  if (typeof IntersectionObserver !== 'undefined') {
+    io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) start()
+      else stop()
+    })
+    io.observe(cv)
+  } else {
+    start()
+  }
 })
 
-onUnmounted(() => cancelAnimationFrame(raf))
+onUnmounted(() => {
+  cancelAnimationFrame(raf)
+  if (io) io.disconnect()
+})
 </script>
 
 <template>
