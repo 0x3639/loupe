@@ -263,10 +263,11 @@ onMounted(() => {
       ctx.restore()
     })
     const ml = 'MOMENTUM CHAIN'
-    ctx.fillStyle = 'hsl(0 0% 10% / .85)'
-    ctx.fillRect(30, MOMY - 39, ctx.measureText(ml).width + 8, 14)
+    const mlw = ctx.measureText(ml).width
+    ctx.fillStyle = 'hsl(0 0% 10% / .95)'
+    ctx.fillRect(28, MOMY - 8, mlw + 10, 16)
     ctx.fillStyle = 'hsl(0 0% 60%)'
-    ctx.fillText(ml, 34, MOMY - 32)
+    ctx.fillText(ml, 33, MOMY + 0.5)
     ctx.textAlign = 'right'
     ctx.fillStyle = 'hsl(0 0% 45%)'
     ctx.fillText('height ' + st.height.toLocaleString('en-US'), w - 8, H - 8)
