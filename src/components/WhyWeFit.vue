@@ -5,7 +5,7 @@ const checks = [
   { title: 'Bitcoin-aligned research', body: 'An open <a href="https://github.com/TminusZ/zenon-developer-commons">research commons</a> exploring Zenon as a potential bitcoin scaling/interoperability layer: SPV models, verification boundaries, Taproot-era designs.' },
   { title: 'No audit budget', body: 'The exact attacker/maintainer asymmetry the Loupe launch post describes — well-resourced attackers, unfunded maintainers.' },
   { title: 'In active development since 2019', body: 'A living Go codebase with consensus, p2p, an embedded VM, wallet, and RPC — real attack surface, actively maintained.' },
-  { title: 'We already build with Spiral tools', body: 'goose is part of our daily coding workflow, and we run buzz (buzz.zenon.info) for the community. Loupe would be the third.' },
+  { title: 'We already build with Spiral tools', body: 'goose is part of our coding workflow, and we run buzz (buzz.zenon.info) for the community. Loupe would be the third.' },
 ]
 </script>
 
