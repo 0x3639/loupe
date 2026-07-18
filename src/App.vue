@@ -31,5 +31,5 @@ const showAside = import.meta.env.VITE_SHOW_ASIDE !== 'false'
 </template>
 
 <style scoped>
-.page { min-height: 100vh; background: var(--bg); }
+.page { min-height: 100vh; background: var(--bg); overflow-x: clip; }
 </style>
