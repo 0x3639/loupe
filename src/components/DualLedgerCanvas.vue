@@ -12,8 +12,9 @@ onMounted(() => {
   const H = 300
   const MOMY = 240
   const MOMIV = 3.0 // a momentum seals every 3s (simulation stand-in for the real 10s cadence)
-  const LANE_MIN = 14 // account-chain speeds wander within this range (px/s)
-  const LANE_MAX = 44
+  const LANE_MIN = 40 // account-chain speeds wander within this range (px/s)
+  const LANE_MAX = 90
+  const GAP = 46 // fixed center-to-center spacing between account blocks (30px block + 16px)
   const LANES = [
     { y: 52, label: 'z1qx…f8a' },
     { y: 108, label: 'z1qp…2mk' },
@@ -27,7 +28,6 @@ onMounted(() => {
       y: l.y,
       label: l.label,
       blocks: [],
-      nextIn: rnd(1.1, 2.8),
       pos: t0 * VM,
       v: rnd(LANE_MIN, LANE_MAX),
       vTarget: rnd(LANE_MIN, LANE_MAX),
@@ -40,14 +40,12 @@ onMounted(() => {
     height: 4821304,
   }
   st.lanes.forEach((l) => {
-    let x = l.pos - 60 * l.v
-    while (x < l.pos) {
-      l.blocks.push({ x, born: t0 - 10 })
-      x += l.v * rnd(1.1, 2.8)
+    for (let i = 24; i >= 0; i--) {
+      l.blocks.push({ x: l.pos - i * GAP, born: t0 - 10 })
     }
   })
   for (let t = t0 - 60; t < t0 - 2; t += MOMIV) {
-    st.moms.push({ x: t * VM, born: t0 - 10, count: 3 + Math.floor(Math.random() * 6) })
+    st.moms.push({ x: t * VM, born: t0 - 10, count: 9 + Math.floor(Math.random() * 6) })
     st.height++
   }
   const rr = (x, y, w, h, r) => {
@@ -77,11 +75,12 @@ onMounted(() => {
       }
       l.v += (l.vTarget - l.v) * Math.min(1, dt * 1.5)
       l.pos += l.v * dt
-      l.nextIn -= dt
-      if (l.nextIn <= 0) {
-        l.blocks.push({ x: l.pos, born: t })
-        st.flies.push({ lane: l, x0: l.pos, y0: l.y, born: t, dur: rnd(0.9, 1.4) })
-        l.nextIn = rnd(1.1, 2.8)
+      // fire by distance, not time: a block spawns each time the chain has
+      // advanced one fixed GAP, so spacing stays uniform and never overlaps
+      while (l.pos - l.blocks[l.blocks.length - 1].x >= GAP) {
+        const x = l.blocks[l.blocks.length - 1].x + GAP
+        l.blocks.push({ x, born: t })
+        st.flies.push({ lane: l, x0: x, y0: l.y, born: t, dur: rnd(0.9, 1.4) })
         if (l.blocks.length > 60) l.blocks.shift()
       }
     })
