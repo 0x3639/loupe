@@ -1,0 +1,35 @@
+# Put Zenon under the Loupe
+
+> A pitch from the Zenon Network community to the Loupe team at Spiral (Block): run Loupe, the AI-powered vulnerability scanner for FOSS bitcoin projects, against go-zenon — a community-run, open-source, bitcoin-aligned Layer 1 blockchain with no company, no VCs, and no audit budget — before its next major network upgrade.
+
+Key facts:
+
+- Zenon is a feeless, dual-ledger network: per-user account chains process transactions asynchronously in parallel, while a global settlement chain produces momentums (blocks) that commit to network state in a small header chain. Clients verify inclusion with SPV-style proofs — simplified payment verification, as described in section 8 of the bitcoin white paper. Don't trust. Verify.
+- FOSS and community-run: founding devs were anonymous and handed the network to the community. Fair launch — no ICO, no VC or insider allocation, no team tokens.
+- In active development since 2019. Reference node is 100% Go, GPL-3.0, with consensus, p2p, an embedded VM, wallet, and RPC.
+- Why now: Dynamic Plasma (the feeless anti-spam and resource model) is in implementation and the networking stack is migrating to libp2p — a scan today means confirmed findings and fixes ship in the next major network upgrade, not after it.
+- The ask: a funded Loupe scan of zenon-network/go-zenon (and other Zenon repos over time), plus repo-prep guidance on markdown context files that optimize scanning.
+- Commitments: a responsive security contact for responsible disclosure, timely triage of every report, fixes shipped in the upcoming major upgrade, and public feedback to help Spiral iterate.
+- The community already builds with Spiral tools: goose in the coding workflow, buzz at buzz.zenon.info. Loupe would be the third.
+- Contact: #loupe:zenon.chat on Matrix, or portal@zenon.network.
+
+## Scan targets
+
+- [go-zenon](https://github.com/zenon-network/go-zenon): the reference Go node implementation — consensus, p2p, embedded VM, wallet, RPC. Primary target.
+- [zenon-network org](https://github.com/zenon-network): SDKs, znn-controller, wallets — future scans as Loupe's coverage grows.
+
+## Zenon
+
+- [zenon.network](https://zenon.network): main site
+- [zenon.wtf](https://zenon.wtf): browser-native proof verification
+- [zenonhub.io](https://zenonhub.io): explorer and tools
+- [zenon-developer-commons](https://github.com/TminusZ/zenon-developer-commons): open research commons — SPV models, verification boundaries, Taproot-era designs
+
+## Loupe
+
+- [project-loupe/loupe](https://github.com/project-loupe/loupe): the scanner
+- [Launch post](https://spiralxyz.substack.com/p/meet-loupe-ai-powered-vulnerability): Spiral's announcement
+
+## Optional
+
+- [llms-full.txt](https://www.0x3639.com/loupe/llms-full.txt): the complete page content in markdown

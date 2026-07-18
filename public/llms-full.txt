@@ -1,0 +1,76 @@
+# Put Zenon under the Loupe
+
+A pitch to the Loupe team at Spiral.
+
+A community-run, open-source, bitcoin-aligned Layer 1 blockchain with no company, no VCs, and no audit budget requests a Loupe security scan before its next major network upgrade.
+
+Talk to us on Matrix: #loupe:zenon.chat (https://matrix.to/#/%23loupe:zenon.chat)
+
+Network facts: 0 VC funding · 0 corporate entities · 0 audit budget (USD) · 100% Go · GPL-3.0 · in active development since 2019.
+
+## What Zenon is
+
+A feeless, dual-ledger network, verifiable from a browser.
+
+Zenon pairs per-user account chains with a global settlement chain that produces momentums (blocks). Each account processes transactions on its own chain — truly asynchronous and parallel — while momentums provide an ordered commitment over the whole network. Because momentums commit to network state in a small header chain, clients can verify inclusion with SPV-style proofs alone — simplified payment verification, as Satoshi described in section 8 of the bitcoin white paper (https://bitcoin.org/bitcoin.pdf). That unlocks browser-native proof verification, wallets, and eventually node participation and execution — no trusted remote RPC. The architecture (https://github.com/TminusZ/zenon-developer-commons) is in place. The community is building out the vision. Don't trust. Verify.
+
+Dual ledger · asynchronous account chains: each account writes to its own chain, in parallel — transactions fire at the settlement layer, get grouped, and are committed into the next momentum. Both ledgers grow together.
+
+Verification-first — Don't trust. Verify.
+1. sync headers — the momentum header chain is small enough for a browser
+2. request proof — an SPV-style path from any transaction to a momentum commitment
+3. verified locally — no trusted remote RPC, ever
+
+Browser-native proofs today; node participation and execution next: zenon.wtf
+
+## Why we fit Loupe's mission
+
+We check the boxes. Loupe exists to fix the attacker/maintainer asymmetry for FOSS bitcoin projects. That asymmetry is our exact situation.
+
+- FOSS, community-run: no corporate entity. Founding devs were anonymous and handed the network to the community; development, node operation, and funding are all community-driven.
+- Fair launch: no ICO, no VC or insider allocation, no team tokens. Users bonded BTC, ran nodes, and received allocations — and their bitcoin back via algorithmic refunds.
+- Bitcoin-aligned research: an open research commons (https://github.com/TminusZ/zenon-developer-commons) exploring Zenon as a potential bitcoin scaling/interoperability layer: SPV models, verification boundaries, Taproot-era designs.
+- No audit budget: the exact attacker/maintainer asymmetry the Loupe launch post describes — well-resourced attackers, unfunded maintainers.
+- In active development since 2019: a living Go codebase with consensus, p2p, an embedded VM, wallet, and RPC — real attack surface, actively maintained.
+- We already build with Spiral tools: goose is part of our coding workflow, and we run buzz (buzz.zenon.info) for the community. Loupe would be the third.
+
+## Why now
+
+Two major changes are mid-flight.
+
+- In implementation — Dynamic Plasma: the feeless anti-spam and resource model — new consensus-adjacent code paths.
+- In migration — libp2p: replacing the networking stack — the p2p attack surface is being rebuilt.
+
+A scan of the current codebase today means confirmed findings and fixes ship in the next major network upgrade — not after it.
+
+## What we're asking for
+
+1. A funded Loupe scan of go-zenon — and other Zenon repos, one at a time, as Loupe supports.
+2. Repo-prep guidance — the launch post says markdown context files optimize scanning; we'll write them.
+
+## What we commit to
+
+- A responsive security contact for responsible disclosure
+- Timely triage of every report
+- Fixes shipped in the upcoming major upgrade
+- Public feedback to help Spiral iterate on the outreach process
+
+## On scope, honestly
+
+We know the Loupe phase 1 rollout is bitcoin-ecosystem repos. We think a fairly-launched, community-run FOSS network researching bitcoin scaling is within the spirit of the program — and we meet the criteria for participation.
+
+## Scan targets
+
+- zenon-network/go-zenon (https://github.com/zenon-network/go-zenon) — Primary. The reference Go node implementation. lang: Go 100% · license: GPL-3.0 · surface: consensus · p2p · embedded VM · wallet · RPC
+- zenon-network/* (https://github.com/zenon-network) — Future scans. SDKs, znn-controller, wallets — one at a time, as Loupe's coverage grows.
+
+## Closing
+
+One scan. Confirmed findings, PoC included, fixed in the next upgrade. No application form needed — Loupe says reach out. So we're reaching out. Meet us on Matrix: #loupe:zenon.chat
+
+## Links
+
+- Zenon: zenon.network · zenon.wtf · zenon.org · zenonhub.io
+- Research: zenon-developer-commons (https://github.com/TminusZ/zenon-developer-commons) · zenon-network org (https://github.com/zenon-network)
+- Loupe: project-loupe/loupe (https://github.com/project-loupe/loupe) · launch post (https://spiralxyz.substack.com/p/meet-loupe-ai-powered-vulnerability) · @ProjectLoupe (https://x.com/ProjectLoupe)
+- Contact: #loupe:zenon.chat · portal@zenon.network
