@@ -19,6 +19,11 @@ onMounted(() => {
   const SLOT_YS = [44, 80, 116, 152, 188] // room for up to 5 visible lanes
   const MIN_LANES = 3
   const MAX_LANES = 5
+  // pending tx dots pool inside the 56x32 ghost box: 6 cols x 3 rows
+  const DOT_COLS = 6
+  const DOT_CAP = DOT_COLS * 3
+  const dotX = (gx, i) => gx - 28 + 7 + (i % DOT_COLS) * 8.5
+  const dotY = (i) => MOMY - 9 + Math.floor(i / DOT_COLS) * 9
   const now = () => performance.now() / 1000
   const rnd = (a, b) => a + Math.random() * (b - a)
   const t0 = now()
@@ -26,17 +31,19 @@ onMounted(() => {
   const pick = (s) => s[Math.floor(Math.random() * s.length)]
   const randLabel = () => `z1q${pick(ADDR_CHARS)}…${pick(ADDR_CHARS)}${pick(ADDR_CHARS)}${pick(ADDR_CHARS)}`
   // lanes fade in already populated: the view is a rotating window over many
-  // account chains, not chains springing into existence
-  const makeLane = (y, label, fadeIn) => {
+  // account chains, not chains springing into existence. The stack is anchored
+  // at the bottom slot; new chains drop in from above and land on top of it.
+  const makeLane = (slot, label, dropIn) => {
     const l = {
-      y,
+      slot,
+      y: dropIn ? SLOT_YS[slot] - 34 : SLOT_YS[slot],
       label,
       blocks: [],
       pos: now() * VM,
       v: rnd(LANE_MIN, LANE_MAX),
       vTarget: rnd(LANE_MIN, LANE_MAX),
       vChangeIn: rnd(2, 4),
-      alpha: fadeIn ? 0 : 1,
+      alpha: dropIn ? 0 : 1,
       leaving: false,
       fadeT: now(),
     }
@@ -47,9 +54,9 @@ onMounted(() => {
   }
   const st = {
     lanes: [
-      makeLane(SLOT_YS[0], 'z1qx…f8a', false),
-      makeLane(SLOT_YS[2], 'z1qp…2mk', false),
-      makeLane(SLOT_YS[4], 'z1qz…9rw', false),
+      makeLane(2, 'z1qx…f8a', false),
+      makeLane(3, 'z1qp…2mk', false),
+      makeLane(4, 'z1qz…9rw', false),
     ],
     moms: [],
     flies: [],
@@ -87,15 +94,16 @@ onMounted(() => {
       const canAdd = live.length < MAX_LANES
       const canRemove = live.length > MIN_LANES
       if (canAdd && (!canRemove || Math.random() < 0.5)) {
-        const used = new Set(st.lanes.map((l) => l.y))
-        const free = SLOT_YS.filter((y) => !used.has(y))
-        if (free.length) {
-          st.lanes.push(makeLane(free[Math.floor(Math.random() * free.length)], randLabel(), true))
-        }
+        // new chain drops in from the top, landing on top of the stack
+        st.lanes.push(makeLane(MAX_LANES - live.length - 1, randLabel(), true))
       } else if (canRemove) {
+        // a chain pops out; every chain stacked above it drops down a slot
         const l = live[Math.floor(Math.random() * live.length)]
         l.leaving = true
         l.fadeT = t
+        live.forEach((o) => {
+          if (o !== l && o.slot < l.slot) o.slot += 1
+        })
       }
       st.nextRotT = t + rnd(2.5, 5)
     }
@@ -109,6 +117,8 @@ onMounted(() => {
       return true
     })
     st.lanes.forEach((l) => {
+      // tetris drop: ease each lane toward its slot's y
+      if (!l.leaving) l.y += (SLOT_YS[l.slot] - l.y) * Math.min(1, dt * 8)
       l.vChangeIn -= dt
       if (l.vChangeIn <= 0) {
         l.vTarget = rnd(LANE_MIN, LANE_MAX)
@@ -122,7 +132,13 @@ onMounted(() => {
       while (l.pos - l.blocks[l.blocks.length - 1].x >= GAP) {
         const x = l.blocks[l.blocks.length - 1].x + GAP
         l.blocks.push({ x, born: t })
-        st.flies.push({ lane: l, x0: x, y0: l.y, born: t, dur: rnd(0.9, 1.4) })
+        st.flies.push({
+          lane: l,
+          x0: x,
+          born: t,
+          dur: rnd(0.9, 1.4),
+          slot: Math.min(DOT_CAP - 1, st.pend.length + st.flies.length),
+        })
         if (l.blocks.length > 60) l.blocks.shift()
       }
     })
@@ -206,40 +222,44 @@ onMounted(() => {
     rr(gx - 28, MOMY - 16, 56, 32, 5)
     ctx.stroke()
     ctx.setLineDash([])
-    st.pend.forEach((p, i) => {
+    // pooled tx dots sit in a grid INSIDE the pending momentum box
+    st.pend.forEach((p) => {
       ctx.beginPath()
-      ctx.arc(gx - 16 + (i % 5) * 8, MOMY - 30 - Math.floor(i / 5) * 9, 3, 0, 7)
+      ctx.arc(dotX(gx, p.slot), dotY(p.slot), 3, 0, 7)
       ctx.fillStyle = 'hsl(145 100% 42%)'
       ctx.fill()
     })
     ctx.restore()
     // fly dots live in screen space: their start (a lane frame) and target
-    // (the momentum frame) scroll at different speeds
-    const gxS = gx - camM
+    // (the momentum frame) scroll at different speeds. Each dot aims at its
+    // own grid slot inside the pending momentum box.
     st.flies.forEach((f) => {
       const sx = f.x0 - (f.lane.pos - w + 120)
+      const sy = f.lane.y
+      const ex = dotX(gx, f.slot) - camM
+      const ey = dotY(f.slot)
       const p = Math.min(1, (t - f.born) / f.dur)
       const e = p * p * (3 - 2 * p)
-      const y1 = MOMY - 30
-      const mx = (sx + gxS) / 2 + 26
-      const my = (f.y0 + y1) / 2
-      const x = (1 - e) * (1 - e) * sx + 2 * (1 - e) * e * mx + e * e * gxS
-      const y = (1 - e) * (1 - e) * f.y0 + 2 * (1 - e) * e * my + e * e * y1
+      const mx = (sx + ex) / 2 + 26
+      const my = (sy + ey) / 2
+      const x = (1 - e) * (1 - e) * sx + 2 * (1 - e) * e * mx + e * e * ex
+      const y = (1 - e) * (1 - e) * sy + 2 * (1 - e) * e * my + e * e * ey
       ctx.beginPath()
       ctx.arc(x, y, 3, 0, 7)
       ctx.fillStyle = 'hsl(145 100% 50% / .95)'
       ctx.fill()
     })
+    // account-chain addresses sit to the LEFT of each chain, on the lane line
     ctx.textAlign = 'left'
     ctx.font = '9px "JetBrains Mono", monospace'
     st.lanes.forEach((l) => {
       ctx.save()
       ctx.globalAlpha = l.alpha
       const tw = ctx.measureText(l.label).width
-      ctx.fillStyle = 'hsl(0 0% 10% / .85)'
-      ctx.fillRect(30, l.y - 26, tw + 8, 14)
+      ctx.fillStyle = 'hsl(0 0% 10% / .95)'
+      ctx.fillRect(28, l.y - 8, tw + 10, 16)
       ctx.fillStyle = 'hsl(0 0% 55%)'
-      ctx.fillText(l.label, 34, l.y - 19)
+      ctx.fillText(l.label, 33, l.y + 0.5)
       ctx.restore()
     })
     const ml = 'MOMENTUM CHAIN'
