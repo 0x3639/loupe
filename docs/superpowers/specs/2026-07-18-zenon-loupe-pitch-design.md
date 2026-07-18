@@ -38,6 +38,8 @@ Repo root = `/Users/dfriestedt/Github/loupe` (this repo). Handoff files stay in 
 
 ### Canvas animations
 
+**Amendment (2026-07-18, post-launch, user-requested):** the dual-ledger animation deviates from the handoff spec — the momentum chain scrolls in its own frame at a steady 26px/s and seals a momentum every 3s (simulating Zenon's 10s cadence), while each account lane scrolls in its own frame at an independently varying speed (14–44px/s, easing toward a new random target every 2–4s). Account chains fire tx dots at the pending momentum's ghost slot throughout each 3s window; fly-dots are drawn in screen space so they track both differently-moving frames.
+
 Ported from the prototype's script with identical parameters (matrix rain: 16px column pitch, 13px glyphs, katakana+code glyph set, 3.5–9.5 rows/s, 18-glyph trail, ~6% mutation; dual-ledger: v=26px/s camera, 3 account lanes, momentum every 3.6s, height counter from 4,821,304). Each is a component owning its own rAF loop, devicePixelRatio-aware, cancelled in `onUnmounted`. Under `prefers-reduced-motion: reduce`, render one static frame.
 
 ## Deltas from the prototype (intentional)

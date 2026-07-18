@@ -8,35 +8,46 @@ onMounted(() => {
   const cv = canvas.value
   const ctx = cv.getContext('2d')
   if (!ctx) return
-  const V = 26
+  const VM = 26 // momentum chain scrolls at this steady speed (px/s)
   const H = 300
   const MOMY = 240
-  const MOMIV = 3.6
+  const MOMIV = 3.0 // a momentum seals every 3s (simulation stand-in for the real 10s cadence)
+  const LANE_MIN = 14 // account-chain speeds wander within this range (px/s)
+  const LANE_MAX = 44
   const LANES = [
     { y: 52, label: 'z1qx…f8a' },
     { y: 108, label: 'z1qp…2mk' },
     { y: 164, label: 'z1qz…9rw' },
   ]
   const now = () => performance.now() / 1000
+  const rnd = (a, b) => a + Math.random() * (b - a)
   const t0 = now()
   const st = {
-    lanes: LANES.map((l) => ({ y: l.y, label: l.label, blocks: [], nextT: 0 })),
+    lanes: LANES.map((l) => ({
+      y: l.y,
+      label: l.label,
+      blocks: [],
+      nextIn: rnd(1.1, 2.8),
+      pos: t0 * VM,
+      v: rnd(LANE_MIN, LANE_MAX),
+      vTarget: rnd(LANE_MIN, LANE_MAX),
+      vChangeIn: rnd(2, 4),
+    })),
     moms: [],
     flies: [],
     pend: [],
-    nextMomT: t0 + 1.6,
+    nextMomT: t0 + MOMIV,
     height: 4821304,
   }
   st.lanes.forEach((l) => {
-    let t = t0 - 60
-    while (t < t0) {
-      l.blocks.push({ x: t * V, born: t0 - 10 })
-      t += 1.1 + Math.random() * 1.7
+    let x = l.pos - 60 * l.v
+    while (x < l.pos) {
+      l.blocks.push({ x, born: t0 - 10 })
+      x += l.v * rnd(1.1, 2.8)
     }
-    l.nextT = t
   })
   for (let t = t0 - 60; t < t0 - 2; t += MOMIV) {
-    st.moms.push({ x: t * V, born: t0 - 10, count: 3 + Math.floor(Math.random() * 6) })
+    st.moms.push({ x: t * VM, born: t0 - 10, count: 3 + Math.floor(Math.random() * 6) })
     st.height++
   }
   const rr = (x, y, w, h, r) => {
@@ -44,8 +55,11 @@ onMounted(() => {
     ctx.roundRect(x, y, w, h, r)
   }
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  let last = t0
   const frame = () => {
     const t = now()
+    const dt = Math.min(0.1, t - last)
+    last = t
     const dpr = window.devicePixelRatio || 1
     const w = cv.clientWidth || 600
     if (cv.width !== Math.round(w * dpr)) {
@@ -54,12 +68,20 @@ onMounted(() => {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, w, H)
-    const cam = t * V - w + 120
+    const camM = t * VM - w + 120
     st.lanes.forEach((l) => {
-      if (t >= l.nextT) {
-        l.blocks.push({ x: t * V, born: t })
-        st.flies.push({ x0: t * V, y0: l.y, x1: st.nextMomT * V, born: t, dur: 0.9 + Math.random() * 0.5 })
-        l.nextT = t + 1.1 + Math.random() * 1.7
+      l.vChangeIn -= dt
+      if (l.vChangeIn <= 0) {
+        l.vTarget = rnd(LANE_MIN, LANE_MAX)
+        l.vChangeIn = rnd(2, 4)
+      }
+      l.v += (l.vTarget - l.v) * Math.min(1, dt * 1.5)
+      l.pos += l.v * dt
+      l.nextIn -= dt
+      if (l.nextIn <= 0) {
+        l.blocks.push({ x: l.pos, born: t })
+        st.flies.push({ lane: l, x0: l.pos, y0: l.y, born: t, dur: rnd(0.9, 1.4) })
+        l.nextIn = rnd(1.1, 2.8)
         if (l.blocks.length > 60) l.blocks.shift()
       }
     })
@@ -72,17 +94,18 @@ onMounted(() => {
     })
     if (t >= st.nextMomT) {
       st.height++
-      st.moms.push({ x: st.nextMomT * V, born: t, count: st.pend.length || 1 })
+      st.moms.push({ x: st.nextMomT * VM, born: t, count: st.pend.length || 1 })
       st.pend = []
       st.nextMomT += MOMIV
       if (st.moms.length > 40) st.moms.shift()
     }
-    ctx.save()
-    ctx.translate(-cam, 0)
     ctx.font = '10px "JetBrains Mono", monospace'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     st.lanes.forEach((l) => {
+      const camL = l.pos - w + 120
+      ctx.save()
+      ctx.translate(-camL, 0)
       ctx.strokeStyle = 'hsl(0 0% 24%)'
       ctx.lineWidth = 1
       ctx.beginPath()
@@ -102,7 +125,10 @@ onMounted(() => {
         ctx.fillStyle = a > 0 ? 'hsl(145 100% 52%)' : 'hsl(0 0% 48%)'
         ctx.fillText('tx', b.x, l.y + 0.5)
       })
+      ctx.restore()
     })
+    ctx.save()
+    ctx.translate(-camM, 0)
     ctx.strokeStyle = 'hsl(0 0% 28%)'
     ctx.beginPath()
     for (let i = 1; i < st.moms.length; i++) {
@@ -132,7 +158,7 @@ onMounted(() => {
       ctx.stroke()
       ctx.fillText(b.count + ' tx', b.x, MOMY + 0.5)
     })
-    const gx = st.nextMomT * V
+    const gx = st.nextMomT * VM
     ctx.setLineDash([4, 4])
     ctx.strokeStyle = 'hsl(0 0% 32%)'
     rr(gx - 28, MOMY - 16, 56, 32, 5)
@@ -144,20 +170,24 @@ onMounted(() => {
       ctx.fillStyle = 'hsl(145 100% 42%)'
       ctx.fill()
     })
+    ctx.restore()
+    // fly dots live in screen space: their start (a lane frame) and target
+    // (the momentum frame) scroll at different speeds
+    const gxS = gx - camM
     st.flies.forEach((f) => {
+      const sx = f.x0 - (f.lane.pos - w + 120)
       const p = Math.min(1, (t - f.born) / f.dur)
       const e = p * p * (3 - 2 * p)
       const y1 = MOMY - 30
-      const mx = (f.x0 + f.x1) / 2 + 26
+      const mx = (sx + gxS) / 2 + 26
       const my = (f.y0 + y1) / 2
-      const x = (1 - e) * (1 - e) * f.x0 + 2 * (1 - e) * e * mx + e * e * f.x1
+      const x = (1 - e) * (1 - e) * sx + 2 * (1 - e) * e * mx + e * e * gxS
       const y = (1 - e) * (1 - e) * f.y0 + 2 * (1 - e) * e * my + e * e * y1
       ctx.beginPath()
       ctx.arc(x, y, 3, 0, 7)
       ctx.fillStyle = 'hsl(145 100% 50% / .95)'
       ctx.fill()
     })
-    ctx.restore()
     ctx.textAlign = 'left'
     ctx.font = '9px "JetBrains Mono", monospace'
     st.lanes.forEach((l) => {
