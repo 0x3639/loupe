@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+body{margin:0;background:hsl(0 0% 8%);color:hsl(0 0% 98%);font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:hsl(214 100% 62%);text-decoration:none}a:hover{color:hsl(214 100% 72%);text-decoration:underline}
+@keyframes zn-step{0%,100%{opacity:.3}12%,80%{opacity:1}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></helmet>
+<div style="min-height:100vh;background:hsl(0 0% 8%)">
+<nav style="display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:22px 32px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <img src="uploads/pasted-1784396231526-0.png" alt="ZNN" style="width:34px;height:34px;border-radius:50%;display:block">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:hsl(0 0% 65%)">zenon → loupe</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:22px;font-size:14px">
+    <a href="https://github.com/zenon-network/go-zenon" style="color:hsl(0 0% 65%)">go-zenon on GitHub</a>
+    <a href="https://matrix.to/#/%23loupe:zenon.chat" style="color:hsl(145 100% 42%)">Talk to us</a>
+  </div>
+</nav>
+
+<header style="max-width:1080px;margin:0 auto;padding:64px 32px 56px;display:grid;grid-template-columns:1.2fr .8fr;gap:56px;align-items:center">
+  <div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;line-height:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin:0 0 14px">A pitch to the Loupe team at Spiral</p>
+    <h1 style="font-size:52px;font-weight:800;line-height:1.08;margin:0 0 18px;text-wrap:balance">Put Zenon under the Loupe.</h1>
+    <p style="font-size:18px;line-height:1.6;color:hsl(0 0% 65%);margin:0 0 28px;max-width:52ch">A community-run, open-source, bitcoin-aligned Layer 1 blockchain with no company, no VCs, and no audit budget requests a Loupe security scan before its next major network upgrade.</p>
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <a href="https://matrix.to/#/%23loupe:zenon.chat" style-hover="filter:brightness(1.1);text-decoration:none" style-active="filter:brightness(.95)" style="display:inline-block;background-image:linear-gradient(180deg, hsl(120 86% 63%) 0%, hsl(145 100% 38%) 100%);color:hsl(0 0% 8%);font-weight:600;font-size:16px;padding:12px 22px;border-radius:6px;transition:filter 150ms cubic-bezier(.4,0,.2,1)">Talk to us on Matrix →</a>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:hsl(0 0% 65%)">#loupe:zenon.chat</span>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;position:relative">
+    <div style="position:absolute;left:50%;top:50%;width:700px;height:620px;transform:translate(calc(-50% - 31px), calc(-50% - 31px));-webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, black 40%, transparent 82%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%, black 40%, transparent 82%);pointer-events:none">{{ rainCanvas }}</div>
+    <sc-if value="{{ showHalo }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;left:50%;top:50%;width:560px;height:560px;transform:translate(calc(-50% - 31px), calc(-50% - 31px));background:radial-gradient(circle at 50% 50%, hsl(145 100% 38% / .25) 0%, transparent 60%);pointer-events:none"></div>
+    </sc-if>
+    <div style="position:relative;width:320px;height:320px">
+      <div style="position:absolute;top:196px;left:196px;width:112px;height:26px;background:linear-gradient(180deg, hsl(0 0% 42%), hsl(0 0% 24%));border-radius:13px;transform:rotate(45deg);transform-origin:left center;box-shadow:0 6px 14px hsl(0 0% 0% / .5)"></div>
+      <div style="position:absolute;top:186px;left:186px;width:34px;height:38px;background:linear-gradient(180deg, hsl(0 0% 48%), hsl(0 0% 26%));border-radius:8px;transform:rotate(45deg);transform-origin:center;box-shadow:0 4px 10px hsl(0 0% 0% / .45)"></div>
+      <div style="position:absolute;top:8px;left:8px;width:220px;height:220px;border-radius:50%;border:11px solid hsl(0 0% 36%);box-shadow:0 18px 40px -8px hsl(0 0% 0% / .7), 0 0 0 2px hsl(0 0% 16%), inset 0 0 0 2px hsl(0 0% 18%), inset 0 2px 1px hsl(0 0% 100% / .28);background:radial-gradient(circle at 34% 28%, hsl(0 0% 15%), hsl(0 0% 9%) 65%);overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <div style="position:absolute;top:12px;left:26px;width:110px;height:52px;border-radius:50%;background:linear-gradient(160deg, hsl(0 0% 100% / .12), transparent 70%);transform:rotate(-24deg);pointer-events:none"></div>
+        <pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.85;color:hsl(0 0% 55%)">func (m *Momentum) Verify(
+  ctx ChainContext,
+) error {
+  <span style="color:hsl(145 100% 42%)">// what does Loupe see?</span>
+  proof := m.SPVProof()
+  …</pre>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div style="border-top:1px solid hsl(0 0% 20%);border-bottom:1px solid hsl(0 0% 20%);background:hsl(0 0% 10%)">
+  <div style="max-width:1080px;margin:0 auto;padding:26px 32px;display:grid;grid-template-columns:repeat(5,1fr);gap:24px">
+    <div><div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700">0</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">VC funding</div></div>
+    <div><div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700">0</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Corporate entities</div></div>
+    <div><div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700">0</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Audit budget, USD</div></div>
+    <div><div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700">100%</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Go · GPL-3.0</div></div>
+    <div><div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:30px;font-weight:700">2019</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">In active development since</div></div>
+  </div>
+</div>
+
+<section style="max-width:1080px;margin:0 auto;padding:72px 32px 0">
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;line-height:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin:0 0 12px">What Zenon is</p>
+  <h2 style="font-size:30px;font-weight:700;margin:0 0 16px">A feeless, dual-ledger network, verifiable from a browser.</h2>
+  <p style="font-size:17px;line-height:1.75;color:hsl(0 0% 80%);max-width:76ch;margin:0">Zenon pairs per-user account chains with a global settlement chain that produces <em>momentums</em> (blocks). Each account processes transactions on its own chain — truly asynchronous and parallel — while momentums provide an ordered commitment over the whole network. Because momentums commit to network state in a small header chain, clients can verify inclusion with SPV-style proofs alone. That unlocks browser-native proof verification, wallets, and eventually node participation and execution — no trusted remote RPC. The <a href="https://github.com/TminusZ/zenon-developer-commons">architecture</a> is in place. The community is building out the vision.</p>
+
+  <div style="margin-top:36px;display:grid;grid-template-columns:1.5fr 1fr;gap:16px">
+    <div style="background:hsl(0 0% 10%);border:1px solid hsl(0 0% 20%);border-radius:10px;padding:26px 28px;box-shadow:0 2px 6px -1px hsl(0 0% 0% / .55), inset 0 1px 0 0 hsl(0 0% 100% / .04)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin-bottom:18px">Dual ledger · asynchronous account chains</div>
+      <div style="-webkit-mask-image:linear-gradient(90deg,transparent 0,black 26px,black 100%);mask-image:linear-gradient(90deg,transparent 0,black 26px,black 100%)">{{ archCanvas }}</div>
+      <div style="margin-top:14px;font-size:13.5px;line-height:1.6;color:hsl(0 0% 65%)">Each account writes to its own chain, in parallel — transactions fire at the settlement layer, get grouped, and are committed into the next momentum. Both ledgers grow together.</div>
+    </div>
+    <div style="background:hsl(0 0% 10%);border:1px solid hsl(0 0% 20%);border-radius:10px;padding:26px 28px;box-shadow:0 2px 6px -1px hsl(0 0% 0% / .55), inset 0 1px 0 0 hsl(0 0% 100% / .04);display:flex;flex-direction:column">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin-bottom:10px">Verification-first</div>
+      <div style="font-size:20px;font-weight:700;margin-bottom:18px">Don't trust. Verify.</div>
+      <div style="display:flex;flex-direction:column;gap:14px;flex:1">
+        <div style="display:flex;gap:12px;align-items:baseline;animation:zn-step 8s infinite;animation-delay:0s">
+          <span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;color:hsl(0 0% 45%);flex:none">01</span>
+          <div style="font-size:14px;line-height:1.55;color:hsl(0 0% 80%)"><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px">sync headers</span> — the momentum header chain is small enough for a browser</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:baseline;animation:zn-step 8s infinite;animation-delay:2.7s">
+          <span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;color:hsl(0 0% 45%);flex:none">02</span>
+          <div style="font-size:14px;line-height:1.55;color:hsl(0 0% 80%)"><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px">request proof</span> — an SPV-style path from any transaction to a momentum commitment</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:baseline;animation:zn-step 8s infinite;animation-delay:5.3s">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(145 100% 42%);flex:none">✓</span>
+          <div style="font-size:14px;line-height:1.55;color:hsl(0 0% 80%)"><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:hsl(145 100% 42%)">verified locally</span> — no trusted remote RPC, ever</div>
+        </div>
+      </div>
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid hsl(0 0% 20%);font-size:13px;line-height:1.6;color:hsl(0 0% 65%)">Browser-native proofs today; node participation and execution next. <a href="https://zenon.wtf" style="font-size:13px">zenon.wtf</a></div>
+    </div>
+  </div>
+</section>
+
+<section style="max-width:1080px;margin:0 auto;padding:72px 32px 0">
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;line-height:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(145 100% 42%);margin:0 0 12px">Why we fit Loupe's mission</p>
+  <h2 style="font-size:30px;font-weight:700;margin:0 0 8px">We check the boxes.</h2>
+  <p style="font-size:16px;color:hsl(0 0% 65%);margin:0 0 28px">Loupe exists to fix the attacker/maintainer asymmetry for FOSS bitcoin projects. That asymmetry is our exact situation.</p>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+    <sc-for list="{{ checks }}" as="c" hint-placeholder-count="5">
+      <div style="display:flex;gap:14px;align-items:flex-start;background:hsl(0 0% 10%);border:1px solid hsl(0 0% 20%);border-radius:10px;padding:20px 22px;box-shadow:0 2px 6px -1px hsl(0 0% 0% / .55), inset 0 1px 0 0 hsl(0 0% 100% / .04)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:hsl(145 100% 42%);line-height:1.2">✓</span>
+        <div><div style="font-size:17px;font-weight:600;margin-bottom:4px">{{ c.title }}</div><div style="font-size:14.5px;line-height:1.6;color:hsl(0 0% 65%)">{{ c.body }}</div></div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="max-width:1080px;margin:0 auto;padding:72px 32px 0">
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;line-height:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin:0 0 12px">Why now</p>
+  <h2 style="font-size:30px;font-weight:700;margin:0 0 16px">Two major changes are mid-flight.</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+    <div style="background:hsl(0 0% 10%);border:1px solid hsl(0 0% 20%);border-radius:10px;padding:22px;box-shadow:0 2px 6px -1px hsl(0 0% 0% / .55), inset 0 1px 0 0 hsl(0 0% 100% / .04)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin-bottom:8px">In implementation</div>
+      <div style="font-size:18px;font-weight:600;margin-bottom:6px">Dynamic Plasma</div>
+      <div style="font-size:14.5px;line-height:1.6;color:hsl(0 0% 65%)">The feeless anti-spam and resource model — new consensus-adjacent code paths.</div>
+    </div>
+    <div style="background:hsl(0 0% 10%);border:1px solid hsl(0 0% 20%);border-radius:10px;padding:22px;box-shadow:0 2px 6px -1px hsl(0 0% 0% / .55), inset 0 1px 0 0 hsl(0 0% 100% / .04)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin-bottom:8px">In migration</div>
+      <div style="font-size:18px;font-weight:600;margin-bottom:6px">libp2p</div>
+      <div style="font-size:14.5px;line-height:1.6;color:hsl(0 0% 65%)">Replacing the networking stack — the p2p attack surface is being rebuilt.</div>
+    </div>
+  </div>
+  <p style="font-size:16px;line-height:1.7;color:hsl(0 0% 80%);margin:0;max-width:76ch">A scan of the current codebase today means confirmed findings and fixes ship <strong>in</strong> the next major network upgrade — not after it.</p>
+</section>
+
+<section style="max-width:1080px;margin:0 auto;padding:72px 32px 0;display:grid;grid-template-columns:1fr 1fr;gap:48px">
+  <div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;line-height:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin:0 0 12px">What we're asking for</p>
+    <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:18px">
+      <li style="display:flex;gap:14px"><span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:700;color:hsl(145 100% 42%)">1</span><span style="font-size:15.5px;line-height:1.65;color:hsl(0 0% 80%)">A funded Loupe scan of go-zenon — and other Zenon repos, one at a time, as Loupe supports.</span></li>
+      <li style="display:flex;gap:14px"><span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:700;color:hsl(145 100% 42%)">2</span><span style="font-size:15.5px;line-height:1.65;color:hsl(0 0% 80%)">If that's out of scope for phase 1: guidance to self-run Loupe with our own model tokens. We'll be the guinea pig for the self-serve path on a Go codebase and report back publicly.</span></li>
+      <li style="display:flex;gap:14px"><span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:700;color:hsl(145 100% 42%)">3</span><span style="font-size:15.5px;line-height:1.65;color:hsl(0 0% 80%)">Repo-prep guidance — the launch post says markdown context files optimize scanning; we'll write them.</span></li>
+    </ol>
+  </div>
+  <div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;line-height:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin:0 0 12px">What we commit to</p>
+    <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:14px">
+      <li style="display:flex;gap:12px;font-size:15.5px;line-height:1.65;color:hsl(0 0% 80%)"><span style="color:hsl(145 100% 42%);font-family:'JetBrains Mono',monospace">→</span>A responsive security contact for responsible disclosure</li>
+      <li style="display:flex;gap:12px;font-size:15.5px;line-height:1.65;color:hsl(0 0% 80%)"><span style="color:hsl(145 100% 42%);font-family:'JetBrains Mono',monospace">→</span>Timely triage of every report</li>
+      <li style="display:flex;gap:12px;font-size:15.5px;line-height:1.65;color:hsl(0 0% 80%)"><span style="color:hsl(145 100% 42%);font-family:'JetBrains Mono',monospace">→</span>Fixes shipped in the upcoming major upgrade</li>
+      <li style="display:flex;gap:12px;font-size:15.5px;line-height:1.65;color:hsl(0 0% 80%)"><span style="color:hsl(145 100% 42%);font-family:'JetBrains Mono',monospace">→</span>Public feedback to help Spiral iterate on the outreach process</li>
+    </ul>
+  </div>
+</section>
+
+<sc-if value="{{ showAside }}" hint-placeholder-val="{{ true }}">
+<section style="max-width:1080px;margin:0 auto;padding:64px 32px 0">
+  <div style="border:1px dashed hsl(0 0% 25%);border-radius:10px;padding:22px 26px;max-width:820px">
+    <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin:0 0 8px">On scope, honestly</p>
+    <p style="font-size:15.5px;line-height:1.7;color:hsl(0 0% 80%);margin:0">We know phase 1 is bitcoin-ecosystem repos. We think a fairly-launched, community-run FOSS network researching bitcoin scaling is within the spirit of the program — and if it isn't, we'll happily take the self-serve path and report back.</p>
+  </div>
+</section>
+</sc-if>
+
+<section style="max-width:1080px;margin:0 auto;padding:72px 32px 0">
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;line-height:1rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%);margin:0 0 12px">Scan targets</p>
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px">
+    <div style="background:hsl(0 0% 10%);border:1px solid hsl(0 0% 20%);border-radius:10px;padding:24px;box-shadow:0 2px 6px -1px hsl(0 0% 0% / .55), inset 0 1px 0 0 hsl(0 0% 100% / .04)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px">
+        <a href="https://github.com/zenon-network/go-zenon" style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:hsl(0 0% 98%)">zenon-network/go-zenon</a>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(145 100% 42%)">Primary</span>
+      </div>
+      <div style="font-size:14.5px;line-height:1.6;color:hsl(0 0% 65%);margin-bottom:14px">The reference Go node implementation.</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-size:12.5px;line-height:1.9;color:hsl(0 0% 80%)">lang: Go 100% · license: GPL-3.0<br>surface: consensus · p2p · embedded VM · wallet · RPC</div>
+    </div>
+    <div style="background:hsl(0 0% 10%);border:1px solid hsl(0 0% 20%);border-radius:10px;padding:24px;box-shadow:0 2px 6px -1px hsl(0 0% 0% / .55), inset 0 1px 0 0 hsl(0 0% 100% / .04)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px">
+        <a href="https://github.com/zenon-network" style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:hsl(0 0% 98%)">zenon-network/*</a>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Future scans</span>
+      </div>
+      <div style="font-size:14.5px;line-height:1.6;color:hsl(0 0% 65%)">SDKs, znn-controller, wallets — one at a time, as Loupe's coverage grows.</div>
+    </div>
+  </div>
+</section>
+
+<section style="max-width:1080px;margin:0 auto;padding:80px 32px;text-align:center">
+  <h2 style="font-size:34px;font-weight:800;margin:0 0 12px;text-wrap:balance">One scan. Confirmed findings, PoC included, fixed in the next upgrade.</h2>
+  <p style="font-size:16px;color:hsl(0 0% 65%);margin:0 0 26px">No application form needed — Loupe says reach out. So we're reaching out.</p>
+  <a href="https://matrix.to/#/%23loupe:zenon.chat" style-hover="border-color:hsl(145 100% 42%);text-decoration:none" style="display:inline-block;border:1px solid hsl(0 0% 30%);color:hsl(0 0% 98%);font-weight:600;font-size:16px;padding:12px 24px;border-radius:6px;transition:border-color 150ms cubic-bezier(.4,0,.2,1)">Meet us on Matrix →</a>
+</section>
+
+<footer style="border-top:1px solid hsl(0 0% 20%)">
+  <div style="max-width:1080px;margin:0 auto;padding:44px 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:32px;font-size:14px">
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Zenon</span>
+      <a href="https://zenon.network">zenon.network</a><a href="https://zenon.wtf/">zenon.wtf</a><a href="https://zenon.org">zenon.org</a><a href="https://zenonhub.io">zenonhub.io</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Research</span>
+      <a href="https://github.com/TminusZ/zenon-developer-commons">zenon-developer-commons</a><a href="https://github.com/zenon-network">zenon-network org</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Loupe</span>
+      <a href="https://github.com/project-loupe/loupe">project-loupe/loupe</a><a href="https://spiralxyz.substack.com/p/meet-loupe-ai-powered-vulnerability">Launch post</a><a href="https://www.youtube.com/watch?v=WisO6hoeUb8">Intro video</a><a href="https://x.com/ProjectLoupe">@ProjectLoupe</a>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.6875rem;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:hsl(0 0% 65%)">Contact</span>
+      <a href="https://matrix.to/#/%23loupe:zenon.chat" style="font-family:'JetBrains Mono',monospace;font-size:12.5px">#loupe:zenon.chat</a>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:hsl(0 0% 45%)">[ add handle / email ]</span>
+    </div>
+  </div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280},&quot;showHalo&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Hero&quot;},&quot;showAside&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.cv = null;
+    this.cRef = (el) => { if (el && el !== this.cv) { this.cv = el; this.startArch(); } };
+    this.rv = null;
+    this.rRef = (el) => { if (el && el !== this.rv) { this.rv = el; this.startRain(); } };
+  }
+  componentWillUnmount() { if (this.raf) cancelAnimationFrame(this.raf); if (this.rainRaf) cancelAnimationFrame(this.rainRaf); }
+  startRain() {
+    if (this.rainRaf) cancelAnimationFrame(this.rainRaf);
+    const cv = this.rv, ctx = cv.getContext('2d');
+    const GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ01<>{}()=:;/*+-#$&';
+    const FS = 13, TRAIL = 18;
+    let cols = [];
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const setup = (w, h) => {
+      const n = Math.ceil(w / (FS + 3));
+      cols = Array.from({length: n}, (_, i) => ({
+        x: i * (FS + 3) + 2,
+        y: Math.random() * h / FS,
+        sp: 3.5 + Math.random() * 6,
+        chars: Array.from({length: Math.ceil(h / FS) + TRAIL}, () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)])
+      }));
+    };
+    let last = performance.now();
+    const frame = (nowMs) => {
+      const dt = Math.min(0.1, (nowMs - last) / 1000); last = nowMs;
+      const dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 300, h = cv.clientHeight || 300;
+      if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      if (cols.length === 0 || cols.length !== Math.ceil(w / (FS + 3))) setup(w, h);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      ctx.font = FS + 'px "JetBrains Mono", monospace'; ctx.textBaseline = 'top';
+      const rows = Math.ceil(h / FS);
+      cols.forEach(c => {
+        c.y += c.sp * dt * (reduced ? 0 : 1);
+        if (Math.random() < 0.06) c.chars[Math.floor(Math.random() * c.chars.length)] = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+        const head = Math.floor(c.y % (rows + TRAIL));
+        for (let k = 0; k < TRAIL; k++) {
+          const r = head - k;
+          if (r < 0 || r >= rows) continue;
+          const a = (k === 0 ? 0.75 : 0.55 * (1 - k / TRAIL));
+          ctx.fillStyle = k === 0 ? `hsl(120 86% 70% / ${a})` : `hsl(145 100% 42% / ${a})`;
+          ctx.fillText(c.chars[(r + Math.floor(c.y / rows)) % c.chars.length], c.x, r * FS);
+        }
+      });
+      if (!reduced) this.rainRaf = requestAnimationFrame(frame);
+    };
+    this.rainRaf = requestAnimationFrame(frame);
+  }
+  startArch() {
+    if (this.raf) cancelAnimationFrame(this.raf);
+    const cv = this.cv, ctx = cv.getContext('2d');
+    const V = 26, H = 300, MOMY = 240, MOMIV = 3.6;
+    const LANES = [{y: 52, label: 'z1qx…f8a'}, {y: 108, label: 'z1qp…2mk'}, {y: 164, label: 'z1qz…9rw'}];
+    const now = () => performance.now() / 1000;
+    const t0 = now();
+    const st = {
+      lanes: LANES.map(l => ({y: l.y, label: l.label, blocks: [], nextT: 0})),
+      moms: [], flies: [], pend: [], nextMomT: t0 + 1.6, height: 4821304
+    };
+    st.lanes.forEach(l => {
+      let t = t0 - 60;
+      while (t < t0) { l.blocks.push({x: t * V, born: t0 - 10}); t += 1.1 + Math.random() * 1.7; }
+      l.nextT = t;
+    });
+    for (let t = t0 - 60; t < t0 - 2; t += MOMIV) { st.moms.push({x: t * V, born: t0 - 10, count: 3 + Math.floor(Math.random() * 6)}); st.height++; }
+    const rr = (x, y, w, h, r) => { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); };
+    const frame = () => {
+      const t = now(), dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 600;
+      if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = H * dpr; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, H);
+      const cam = t * V - w + 120;
+      st.lanes.forEach(l => {
+        if (t >= l.nextT) {
+          l.blocks.push({x: t * V, born: t});
+          st.flies.push({x0: t * V, y0: l.y, x1: st.nextMomT * V, born: t, dur: 0.9 + Math.random() * 0.5});
+          l.nextT = t + 1.1 + Math.random() * 1.7;
+          if (l.blocks.length > 60) l.blocks.shift();
+        }
+      });
+      st.flies = st.flies.filter(f => { if (t - f.born >= f.dur) { st.pend.push(f); return false; } return true; });
+      if (t >= st.nextMomT) {
+        st.height++;
+        st.moms.push({x: st.nextMomT * V, born: t, count: st.pend.length || 1});
+        st.pend = [];
+        st.nextMomT += MOMIV;
+        if (st.moms.length > 40) st.moms.shift();
+      }
+      ctx.save(); ctx.translate(-cam, 0);
+      ctx.font = '10px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      st.lanes.forEach(l => {
+        ctx.strokeStyle = 'hsl(0 0% 24%)'; ctx.lineWidth = 1; ctx.beginPath();
+        for (let i = 1; i < l.blocks.length; i++) { ctx.moveTo(l.blocks[i-1].x + 15, l.y); ctx.lineTo(l.blocks[i].x - 15, l.y); }
+        ctx.stroke();
+        l.blocks.forEach(b => {
+          const a = Math.max(0, 1 - (t - b.born) / 0.8);
+          const pop = 1 + 0.25 * Math.max(0, 1 - (t - b.born) / 0.25);
+          rr(b.x - 15 * pop, l.y - 10 * pop, 30 * pop, 20 * pop, 4);
+          ctx.fillStyle = 'hsl(0 0% 15%)'; ctx.fill();
+          ctx.strokeStyle = a > 0 ? `hsl(145 100% 42% / ${0.3 + 0.7 * a})` : 'hsl(0 0% 26%)'; ctx.stroke();
+          ctx.fillStyle = a > 0 ? 'hsl(145 100% 52%)' : 'hsl(0 0% 48%)';
+          ctx.fillText('tx', b.x, l.y + 0.5);
+        });
+      });
+      ctx.strokeStyle = 'hsl(0 0% 28%)'; ctx.beginPath();
+      for (let i = 1; i < st.moms.length; i++) { ctx.moveTo(st.moms[i-1].x + 28, MOMY); ctx.lineTo(st.moms[i].x - 28, MOMY); }
+      ctx.stroke();
+      st.moms.forEach(b => {
+        const a = Math.max(0, 1 - (t - b.born) / 1.0);
+        rr(b.x - 28, MOMY - 16, 56, 32, 5);
+        if (a > 0) {
+          const g = ctx.createLinearGradient(0, MOMY - 16, 0, MOMY + 16);
+          g.addColorStop(0, `hsl(120 86% 63% / ${0.15 + 0.85 * a})`); g.addColorStop(1, `hsl(145 100% 38% / ${0.15 + 0.85 * a})`);
+          ctx.fillStyle = 'hsl(0 0% 15%)'; ctx.fill(); rr(b.x - 28, MOMY - 16, 56, 32, 5); ctx.fillStyle = g; ctx.fill();
+          ctx.fillStyle = a > 0.4 ? 'hsl(0 0% 8%)' : 'hsl(0 0% 65%)';
+        } else {
+          ctx.fillStyle = 'hsl(0 0% 15%)'; ctx.fill();
+          ctx.fillStyle = 'hsl(0 0% 55%)';
+        }
+        ctx.strokeStyle = a > 0 ? `hsl(145 100% 42% / ${0.4 + 0.6 * a})` : 'hsl(0 0% 30%)'; ctx.stroke();
+        ctx.fillText(b.count + ' tx', b.x, MOMY + 0.5);
+      });
+      const gx = st.nextMomT * V;
+      ctx.setLineDash([4, 4]); ctx.strokeStyle = 'hsl(0 0% 32%)';
+      rr(gx - 28, MOMY - 16, 56, 32, 5); ctx.stroke(); ctx.setLineDash([]);
+      st.pend.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(gx - 16 + (i % 5) * 8, MOMY - 30 - Math.floor(i / 5) * 9, 3, 0, 7);
+        ctx.fillStyle = 'hsl(145 100% 42%)'; ctx.fill();
+      });
+      st.flies.forEach(f => {
+        const p = Math.min(1, (t - f.born) / f.dur), e = p * p * (3 - 2 * p);
+        const y1 = MOMY - 30, mx = (f.x0 + f.x1) / 2 + 26, my = (f.y0 + y1) / 2;
+        const x = (1-e)*(1-e)*f.x0 + 2*(1-e)*e*mx + e*e*f.x1;
+        const y = (1-e)*(1-e)*f.y0 + 2*(1-e)*e*my + e*e*y1;
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, 7);
+        ctx.fillStyle = 'hsl(145 100% 50% / .95)'; ctx.fill();
+      });
+      ctx.restore();
+      ctx.textAlign = 'left'; ctx.font = '9px "JetBrains Mono", monospace';
+      st.lanes.forEach(l => {
+        const tw = ctx.measureText(l.label).width;
+        ctx.fillStyle = 'hsl(0 0% 10% / .85)'; ctx.fillRect(30, l.y - 26, tw + 8, 14);
+        ctx.fillStyle = 'hsl(0 0% 55%)'; ctx.fillText(l.label, 34, l.y - 19);
+      });
+      const ml = 'MOMENTUM CHAIN';
+      ctx.fillStyle = 'hsl(0 0% 10% / .85)'; ctx.fillRect(30, MOMY - 39, ctx.measureText(ml).width + 8, 14);
+      ctx.fillStyle = 'hsl(0 0% 60%)'; ctx.fillText(ml, 34, MOMY - 32);
+      ctx.textAlign = 'right'; ctx.fillStyle = 'hsl(0 0% 45%)';
+      ctx.fillText('height ' + st.height.toLocaleString('en-US'), w - 8, H - 8);
+      if (!this.reduced) this.raf = requestAnimationFrame(frame);
+    };
+    this.reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    frame();
+  }
+  renderVals() {
+    return {
+      archCanvas: React.createElement('canvas', {ref: this.cRef, style: {width: '100%', height: '300px', display: 'block'}}),
+      rainCanvas: React.createElement('canvas', {ref: this.rRef, style: {width: '100%', height: '100%', display: 'block'}}),
+      showHalo: this.props.showHalo ?? true,
+      showAside: this.props.showAside ?? true,
+      checks: [
+        {title: "FOSS, community-run", body: "No corporate entity. Founding devs were anonymous and handed the network to the community; development, node operation, and funding are all community-driven."},
+        {title: "Fair launch", body: "No ICO, no VC or insider allocation, no team tokens. Users bonded BTC, ran nodes, and received allocations — and their bitcoin back via algorithmic refunds."},
+        {title: "Bitcoin-aligned research", body: "An open research commons exploring Zenon as a potential bitcoin scaling/interoperability layer: SPV models, verification boundaries, Taproot-era designs."},
+        {title: "No audit budget", body: "The exact attacker/maintainer asymmetry the Loupe launch post describes — well-resourced attackers, unfunded maintainers."},
+        {title: "In active development since 2019", body: "A living Go codebase with consensus, p2p, an embedded VM, wallet, and RPC — real attack surface, actively maintained."},
+        {title: "We already build with Spiral tools", body: "goose is part of our daily coding workflow, and we run buzz (buzz.zenon.info) for the community. Loupe would be the third."}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
