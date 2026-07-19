@@ -32,4 +32,4 @@ Key facts:
 
 ## Optional
 
-- [llms-full.txt](https://www.0x3639.com/loupe/llms-full.txt): the complete page content in markdown
+- [llms-full.txt](https://loupe.zenon.network/llms-full.txt): the complete page content in markdown
