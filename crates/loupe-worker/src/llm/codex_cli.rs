@@ -5,11 +5,11 @@
 //! login state, and provider credentials are not mounted into the sandbox;
 //! model traffic goes through a job-scoped, credential-free broker.
 //!
-//! Wire shape: `codex exec --dangerously-bypass-approvals-and-sandbox
-//! --skip-git-repo-check "$prompt"`. The bypass flag is the codex
-//! analog of claude's `--dangerously-skip-permissions`; the bwrap
-//! sandbox is the actual security boundary, not codex's own
-//! permission machinery.
+//! Each `codex exec` selects the embedded `loupe` permission profile:
+//! read access to the visible runtime and repository, writes to disposable
+//! home and tmp directories, and no approval prompts. Command networking
+//! stays subject to the outer sandbox's namespace and firewall policy.
+//! Bubblewrap and the host-side brokers remain the security boundary.
 //!
 //! When constructed with [`McpContext`] the backend additionally
 //! advertises the loupe MCP server (and optionally bkb-mcp) to
@@ -259,12 +259,18 @@ impl LlmBackend for CodexCliBackend {
 				));
 				overrides.push(format!("mcp_servers.loupe.args={}", toml_string_array(&args)));
 				overrides.push("mcp_servers.loupe.env={}".to_owned());
+				// Only worker-provided MCP servers are preapproved. Loupe's broker
+				// still enforces the job capability and tool scope on the host.
+				overrides
+					.push("mcp_servers.loupe.default_tools_approval_mode=\"approve\"".to_owned());
 				if ctx.bkb_mcp_path.is_some() {
 					overrides.push(format!(
 						"mcp_servers.bkb.command={}",
 						toml_string_literal(SANDBOX_BKB_MCP_BIN)
 					));
 					overrides.push("mcp_servers.bkb.args=[]".to_owned());
+					overrides
+						.push("mcp_servers.bkb.default_tools_approval_mode=\"approve\"".to_owned());
 					overrides.push(format!(
 						"mcp_servers.bkb.env={{ BKB_API_URL = {} }}",
 						toml_string_literal(&ctx.bkb_api_url)
@@ -457,12 +463,17 @@ fn codex_model_provider_overrides() -> [String; 5] {
 	]
 }
 
+fn codex_permission_overrides() -> Vec<String> {
+	let policy: toml::Table = toml::from_str(include_str!("codex-permissions.toml"))
+		.expect("embedded Codex permissions must be valid TOML");
+	policy.into_iter().map(|(key, value)| format!("{key}={value}")).collect()
+}
+
 fn codex_invocation_args(
 	agent: &CliModelConfig, mcp_overrides: &[String], prompt: &str,
 ) -> Vec<String> {
 	let mut args = vec![
 		"exec".to_owned(),
-		"--dangerously-bypass-approvals-and-sandbox".to_owned(),
 		"--skip-git-repo-check".to_owned(),
 		"--ephemeral".to_owned(),
 		"--ignore-user-config".to_owned(),
@@ -471,7 +482,7 @@ fn codex_invocation_args(
 		"-c".to_owned(),
 		format!("model_reasoning_effort={}", toml_string_literal(&agent.effort)),
 	];
-	for ov in codex_model_provider_overrides() {
+	for ov in codex_permission_overrides().into_iter().chain(codex_model_provider_overrides()) {
 		args.push("-c".to_owned());
 		args.push(ov);
 	}
@@ -744,6 +755,46 @@ mod tests {
 		let arr = parsed["k"].as_array().expect("must be array");
 		let back: Vec<String> = arr.iter().map(|v| v.as_str().unwrap().to_owned()).collect();
 		assert_eq!(back, items);
+	}
+
+	#[test]
+	fn invocation_enforces_bounded_permissions_without_approvals() {
+		let args = codex_invocation_args(
+			&CliModelConfig { model: "gpt-test".into(), effort: "xhigh".into() },
+			&[],
+			"hello",
+		);
+		assert!(
+			!args.iter().any(|arg| matches!(
+				arg.as_str(),
+				"--dangerously-bypass-approvals-and-sandbox"
+					| "--yolo"
+					| "--sandbox"
+					| "--full-auto"
+			)),
+			"Codex must select the bounded profile instead of bypassing it: {args:?}"
+		);
+		let overrides = args
+			.windows(2)
+			.filter(|pair| pair[0] == "-c")
+			.map(|pair| pair[1].as_str())
+			.collect::<Vec<_>>()
+			.join("\n");
+		let config: toml::Value = toml::from_str(&overrides).unwrap();
+		assert_eq!(config["approval_policy"].as_str(), Some("never"));
+		assert_eq!(config["default_permissions"].as_str(), Some("loupe"));
+		assert!(config.get("sandbox_mode").is_none());
+		assert!(config.get("sandbox_workspace_write").is_none());
+		let profile = &config["permissions"]["loupe"];
+		let filesystem = profile["filesystem"].as_table().unwrap();
+		assert_eq!(filesystem.len(), 4, "only the visible runtime and two scratch roots");
+		for (path, access) in
+			[(":root", "read"), ("/workdir", "read"), ("/home/scanner", "write"), ("/tmp", "write")]
+		{
+			assert_eq!(filesystem[path].as_str(), Some(access), "permission for {path}");
+		}
+		assert_eq!(profile["network"]["enabled"].as_bool(), Some(true));
+		assert_eq!(config["features"]["network_proxy"].as_bool(), Some(false));
 	}
 
 	#[test]

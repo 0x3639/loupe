@@ -59,8 +59,11 @@ Before installing, the host needs:
   uses Codex for scan or verify jobs. The default verifier prefers
   Codex so the second opinion comes from a different model family than
   the default scanner; it falls back to Claude if Codex is not ready.
-  Codex invocations shell out to `codex exec
-  --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check`.
+  Codex invocations automatically select the worker's embedded `loupe`
+  permission profile with approvals disabled: the repository is read-only,
+  `/tmp` and the disposable scanner home are writable, and command network
+  access follows the outer sandbox policy. Build scratch copies under
+  `/tmp`; no separate Codex configuration is needed.
   For API-key auth, set `CODEX_API_KEY`; `OPENAI_API_KEY` remains a
   compatibility alias. The key is consumed by the worker-host broker and
   is never passed to the Codex sandbox.

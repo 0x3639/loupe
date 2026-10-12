@@ -1,0 +1,27 @@
+# Codex policy for execution INSIDE Loupe's Bubblewrap sandbox.
+# Embedded in the worker and passed as explicit -c overrides on every run.
+# No operator config file or deployment mount is needed.
+# Do not use this policy directly on the worker host: read visibility and
+# network filtering rely on the outer sandbox.
+
+approval_policy = "never"
+default_permissions = "loupe"
+
+[permissions.loupe.filesystem]
+# Read only the filesystem already exposed by Bubblewrap, including
+# runtime libraries, per-user CLI installs, and credential-free brokers.
+":root" = "read"
+"/workdir" = "read"
+# Both directories are fresh tmpfs mounts for each invocation.
+"/home/scanner" = "write"
+"/tmp" = "write"
+
+[permissions.loupe.network]
+# Permit command networking within the outer sandbox's network policy.
+# Model and MCP transports have separate controls outside this profile.
+enabled = true
+
+[features]
+# Loupe's network namespace and firewall enforce destination restrictions.
+# No domain rules are claimed or enforced by this inner Codex policy.
+network_proxy = false
