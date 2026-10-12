@@ -20,6 +20,11 @@ FROM rust:${RUST_VERSION}-bookworm AS bkb-mcp-builder
 ARG BKB_MCP_VERSION=0.2.0
 RUN cargo install bkb-mcp --version "${BKB_MCP_VERSION}" --locked
 
+FROM rust:${RUST_VERSION}-bookworm AS worker-rust
+# Export real binaries and their sysroot, without per-user rustup state.
+RUN rustup component add rustfmt clippy \
+	&& cp -a "$(rustc --print sysroot)" /worker-rust
+
 FROM debian:trixie-slim AS loupe-server
 # No `ca-certificates` here: loupe-server's only outbound TLS is the
 # GitHub reporter, which uses reqwest + rustls with webpki-roots
@@ -54,9 +59,23 @@ ENV NPM_CONFIG_AUDIT=false \
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		bubblewrap ca-certificates git iproute2 nftables slirp4netns tini util-linux \
+		autoconf automake bison build-essential cmake curl flex libtool ninja-build patch pkgconf \
+		golang-go default-jdk-headless python3 python3-dev python3-venv \
+		capnproto libboost-dev libcapnp-dev libevent-dev libsqlite3-dev libssl-dev \
+		libzmq3-dev systemtap-sdt-dev zlib1g-dev \
+		libgl-dev libqrencode-dev qt6-base-dev qt6-l10n-tools qt6-tools-dev \
+		qt6-tools-dev-tools qt6-wayland \
+		unzip xz-utils zip \
 	&& nsenter --help | grep -q -- --user-parent \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& useradd --uid 10002 --user-group --home-dir /var/lib/loupe-worker --create-home --shell /usr/sbin/nologin loupe-worker
+# The sandbox hides /etc/alternatives and Java's /etc configuration. Resolve
+# compiler aliases (including cc/c++) and JDK data into the read-only /usr tree.
+RUN find /usr/bin -maxdepth 1 -type l -lname '/etc/alternatives/*' \
+		-exec sh -ec 'for link do ln -sf "$(readlink -f "$link")" "$link"; done' sh {} + \
+	&& find "$(readlink -f /usr/lib/jvm/default-java)" -type l -lname '/etc/*' \
+		-exec sh -ec 'for link do cp --remove-destination "$(readlink -f "$link")" "$link"; done' sh {} +
+COPY --from=worker-rust /worker-rust/ /usr/local/
 # Resolve current releases when building an image, never inside a running
 # worker. Explicit versions remain available for rollback or diagnosis.
 ARG CLAUDE_CODE_VERSION=latest

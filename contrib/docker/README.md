@@ -36,6 +36,21 @@ The worker host does not need host Rust, Cargo, Node, npm, Git, `bubblewrap`,
 `slirp4netns`, `nft`, `ip`, `nsenter`, Claude Code, Codex, or `bkb-mcp`.
 Those are installed in the worker image.
 
+The worker image also includes Go, OpenJDK, Python with virtual-environment
+support, GCC/G++, CMake, Ninja, Autotools, and native development libraries
+for Boost, OpenSSL, SQLite, compression, IPC, messaging, tracing, and Qt 6.
+Rust, Cargo, rustfmt, and Clippy use the image's pinned `RUST_VERSION`
+(`LOUPE_RUST_VERSION` in `build-images.sh`). Rust and Java are installed so
+they work through the sandbox's read-only `/usr` mount with a fresh home;
+they do not need the operator's toolchain configuration.
+
+Build a scratch copy under `/tmp` and place Cargo output in
+`/tmp/cargo-target`. Package caches belong in the disposable scanner home.
+Toolchain installation does not change the read-only repository mount,
+the network policy, or the prompts' restrictions on dependency sources.
+Jobs that need downloaded dependencies also need an explicit source policy
+and either permitted download hosts or an approved offline cache.
+
 Worker image builds default to the npm `latest` releases of Claude Code and
 Codex. `build-images.sh` refreshes their install layer on every build while
 retaining the Rust and system-package caches. Rebuild and deploy the worker
@@ -97,6 +112,28 @@ podman save "$LOUPE_WORKER_IMAGE" | ssh deploy@worker sudo podman load
 
 With a registry, push/pull the same image names and set
 `LOUPE_SERVER_PULL_IMAGE=1` or `LOUPE_WORKER_PULL_IMAGE=1` when deploying.
+
+### Check the worker toolchains
+
+The opt-in `toolchains` tests compile and run small Rust, Go, Java, Python,
+and native CMake fixtures through Loupe's actual sandbox, with no network
+and a fresh home for each test. Run them against a built worker image on
+a Linux host with the same architecture and a compatible glibc:
+
+```bash
+set -euo pipefail
+export CARGO_TARGET_DIR="$(mktemp -d /tmp/cargo-target-loupe-toolchain-tests.XXXXXX)"
+test_binary=$(cargo test --locked -p loupe-worker --test toolchains \
+  --no-run --message-format=json | jq -r \
+  'select(.reason == "compiler-artifact" and .target.name == "toolchains") | .executable // empty')
+sudo podman run --rm --privileged \
+  --entrypoint /toolchain-tests \
+  --volume "$test_binary:/toolchain-tests:ro" \
+  "$LOUPE_WORKER_IMAGE" --ignored --nocapture
+```
+
+These checks run as the image's worker user and use the same container
+privilege setting as deployment. They do not require provider credentials.
 
 ## Bootstrap Server Secrets
 
