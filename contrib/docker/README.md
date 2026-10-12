@@ -65,10 +65,12 @@ or diagnosis. Retain a known-good image for rollback when tracking `latest`.
 Set `LOUPE_TEST_CLAUDE_BIN` and `LOUPE_TEST_CODEX_BIN` to the candidate
 executables when running `cargo test -p loupe-worker --test model_broker`.
 The opt-in tests log the selected versions and check real CLI request routing
-inside the no-egress sandbox, without requiring a hard-coded version. They
-do not establish a complete successful model conversation; smoke-test new
-images before deployment. Broker credential and endpoint restrictions remain
-enforced if a newer CLI is incompatible.
+inside the no-egress sandbox, without requiring a hard-coded version. The
+Codex test also completes a scripted conversation with command execution,
+scratch writes, blocked repository writes, and a Loupe MCP call. It uses a
+local model fixture, so it does not validate a provider's live behavior;
+smoke-test new images before deployment. Broker credential and endpoint
+restrictions remain enforced if a newer CLI is incompatible.
 
 Optional bootstrap. The script takes the host's role and prepares only that
 role, so a host running both needs one run per role:
@@ -241,6 +243,16 @@ Provider credentials remain in the trusted worker process. Each agent
 sandbox receives a fresh job-scoped model socket, a loopback adapter, and a
 fixed non-secret client sentinel; it receives neither the provider key nor
 the worker's saved CLI login state.
+
+Every Codex invocation automatically selects the `loupe` permission profile
+embedded in the worker binary. Rebuild and deploy the worker image to activate
+it; there is no separate profile file to install or mount. Codex can read the
+filesystem exposed by Bubblewrap and write to `/tmp` and `/home/scanner`.
+The repository remains read-only, approvals are disabled, and command network
+access remains constrained by `LOUPE_SANDBOX_NETWORK` and its allowlist.
+Worker-provided Loupe and optional BKB MCP tools are explicitly preapproved;
+the host-side Loupe broker continues to enforce each job's capability and scope.
+This configuration does not control provider-side safety restrictions.
 
 ## Secret Handling
 
